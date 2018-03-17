@@ -34,7 +34,8 @@ class AnyDevice(gatt.Device):
 	def characteristic_value_updated(self, characteristic, value):
 		liczby = struct.unpack('bbb', value)
 		print (liczby[0])
-		
+		if liczby[0]==0:
+			print("Auto")
 		self.disconnect()
 		self.manager.stop()
 		
