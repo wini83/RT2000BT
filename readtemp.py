@@ -36,8 +36,8 @@ class AnyDevice(gatt.Device):
 		liczby = struct.unpack('bbbbbbb', value)
 		print (liczby[0]/2)
 		print (liczby[1]/2)
-		print(domobridge.set_temp(1802, liczby[0]/2))
-		print(domobridge.set_temp(1801, liczby[1]/2))
+		print(domobridge.set_temp(1802, str(liczby[0]/2)))
+		print(domobridge.set_temp(1801, str(liczby[1]/2)))
 		
 		self.disconnect()
 		self.manager.stop()
