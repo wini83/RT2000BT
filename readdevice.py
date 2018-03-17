@@ -27,6 +27,9 @@ class AnyDevice(gatt.Device):
     is_settings_readed = False
     is_status_readed = False
     is_battery_readed = False
+    battery = 255
+    ist_wert = 0
+    soll_wert = 0
     def services_resolved(self):
         super().services_resolved()
 
@@ -53,13 +56,12 @@ class AnyDevice(gatt.Device):
         print("[%s] Disconnected" % (self.mac_address))    
 
     def characteristic_value_updated(self, characteristic, value):
-        print(characteristic.uuid)
-        liczby = struct.unpack('bbbbbbb', value)
-        ist = str(liczby[0]/2)
-        soll =str(liczby[1]/2)
-        print(domobridge.set_temp(1802, ist))
-        print(domobridge.set_temp(1801, soll))
-        
+        if(characteristic.uuid == SETTINGS_ID):
+            liczby = struct.unpack('bbbbbbb', value)
+            ist = str(liczby[0]/2)
+            soll =str(liczby[1]/2)
+            print(domobridge.set_temp(1802, ist))
+            print(domobridge.set_temp(1801, soll))
         self.disconnect()
         self.manager.stop()
         
