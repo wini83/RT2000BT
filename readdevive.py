@@ -53,7 +53,7 @@ class AnyDevice(gatt.Device):
         print("[%s] Disconnected" % (self.mac_address))    
 
     def characteristic_value_updated(self, characteristic, value):
-        print(characteristic)
+        print(characteristic.uuid)
         liczby = struct.unpack('bbbbbbb', value)
         ist = str(liczby[0]/2)
         soll =str(liczby[1]/2)
