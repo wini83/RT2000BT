@@ -1,6 +1,7 @@
 import gatt
 import time
 import binascii
+import struct
 
 manager = gatt.DeviceManager(adapter_name='hci0')
 
@@ -34,6 +35,8 @@ class AnyDevice(gatt.Device):
 
 	def characteristic_value_updated(self, characteristic, value):
 		print("Firmware version:", binascii.hexlify(value))# value.decode("utf-8"))
+		liczby = struct.unpack('bbbbbbb', value)
+		print (liczby[0]/2)
 		self.disconnect()
 		self.manager.stop()
 		
