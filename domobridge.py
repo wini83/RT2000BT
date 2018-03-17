@@ -24,8 +24,8 @@ def domoticz_set_value(idx,value):
     req = urllib.request.Request(url)
     response = urllib.request.urlopen(req)
 
-    # Parse Json
-    data = json.load(response)
+    reader = codecs.getreader("utf-8")
+    data = json.load(reader(response))
     return data
 
 
