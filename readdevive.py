@@ -24,7 +24,9 @@ PIN_ID = "47e9ee30-47e9-11e4-8939-164230d1df67"
 manager = gatt.DeviceManager(adapter_name='hci0')
 
 class AnyDevice(gatt.Device):
-    is_pin_seted = False 
+    is_settings_readed = False
+    is_status_readed = False
+    is_battery_readed = False
     def services_resolved(self):
         super().services_resolved()
 
@@ -51,6 +53,7 @@ class AnyDevice(gatt.Device):
         print("[%s] Disconnected" % (self.mac_address))    
 
     def characteristic_value_updated(self, characteristic, value):
+        print(characteristic)
         liczby = struct.unpack('bbbbbbb', value)
         ist = str(liczby[0]/2)
         soll =str(liczby[1]/2)
