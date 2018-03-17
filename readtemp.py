@@ -2,6 +2,7 @@ import gatt
 import time
 import binascii
 import struct
+import domobridge
 
 manager = gatt.DeviceManager(adapter_name='hci0')
 
@@ -35,6 +36,8 @@ class AnyDevice(gatt.Device):
 		liczby = struct.unpack('bbbbbbb', value)
 		print (liczby[0]/2)
 		print (liczby[1]/2)
+		print(domobridge.set_temp(1802, liczby[0]/2))
+		print(domobridge.set_temp(1801, liczby[1]/2))
 		
 		self.disconnect()
 		self.manager.stop()
