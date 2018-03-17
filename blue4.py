@@ -7,8 +7,6 @@ manager = gatt.DeviceManager(adapter_name='hci0')
 
 class AnyDevice(gatt.Device):
 	is_pin_seted = False 
-	is_battery_readed = False
-	is_temp_readed	= False
 	def services_resolved(self):
 		super().services_resolved()
 
@@ -34,9 +32,10 @@ class AnyDevice(gatt.Device):
 		print("[%s] Disconnected" % (self.mac_address))	
 
 	def characteristic_value_updated(self, characteristic, value):
-		print("Firmware version:", binascii.hexlify(value))# value.decode("utf-8"))
 		liczby = struct.unpack('bbbbbbb', value)
 		print (liczby[0]/2)
+		print (liczby[1]/2)
+		
 		self.disconnect()
 		self.manager.stop()
 		
