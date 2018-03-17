@@ -34,10 +34,10 @@ class AnyDevice(gatt.Device):
 
 	def characteristic_value_updated(self, characteristic, value):
 		liczby = struct.unpack('bbbbbbb', value)
-		print (liczby[0]/2)
-		print (liczby[1]/2)
-		print(domobridge.set_temp(1802, str(liczby[0]/2)))
-		print(domobridge.set_temp(1801, str(liczby[1]/2)))
+		ist = str(liczby[0]/2)
+		soll =str(liczby[1]/2)
+		print(domobridge.set_temp(1802, ist))
+		print(domobridge.set_temp(1801, soll))
 		
 		self.disconnect()
 		self.manager.stop()
