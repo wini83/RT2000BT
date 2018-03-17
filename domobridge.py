@@ -59,8 +59,7 @@ def read_SetPoint(idx):
         return -255
     
 def set_temp(idx,value):
-    status_idx = domoticz_set_value(idx, value)
-    
+    status_idx = domoticz_set_value(idx, value)    
     try:
         dev_status = status_idx["status"]
         if dev_status == "OK":
