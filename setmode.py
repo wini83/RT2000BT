@@ -66,14 +66,20 @@ class AnyDevice(gatt.Device):
         self.manager.stop()
         
     def characteristic_write_value_succeeded(self, characteristic):
-        print("Write successful.")
-        device_information_service = next(
-            s for s in self.services
-            if s.uuid == SERVICE_ID)
-        actual = next(
-        d for d in device_information_service.characteristics
-            if d.uuid == SETTINGS_ID)           
-        actual.write_value(bytearray(b'\x01\x80\x80'))
+
+        if(characteristic.uuid == PIN_ID):
+            print("Write PIN successful.")
+            device_information_service = next(
+                s for s in self.services
+                if s.uuid == SERVICE_ID)
+            actual = next(
+            d for d in device_information_service.characteristics
+                if d.uuid == SETTINGS_ID)           
+            actual.write_value(bytearray(b'\x01\x80\x80'))
+        elif(characteristic.uuid == STATUS_ID):
+            print("Status updated!")
+            self.disconnect()
+            self.manager.stop()
 
     def characteristic_write_value_failed(self, characteristic, error):
         print("Write failed. "+str(error))
