@@ -75,8 +75,8 @@ class AnyDevice(gatt.Device):
             print("succes!")
         #print(domobridge.set_temp(1802, ist))
         #print(domobridge.set_temp(1801, soll))
-        self.disconnect()
-        self.manager.stop()
+        #self.disconnect()
+        #self.manager.stop()
         
     def characteristic_write_value_succeeded(self, characteristic):
         print("Write successful.")
