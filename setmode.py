@@ -74,7 +74,7 @@ class AnyDevice(gatt.Device):
                 if s.uuid == SERVICE_ID)
             actual = next(
             d for d in device_information_service.characteristics
-                if d.uuid == SETTINGS_ID)           
+                if d.uuid == STATUS_ID)           
             actual.write_value(bytearray(b'\x01\x80\x80'))
         elif(characteristic.uuid == STATUS_ID):
             print("Status updated!")
