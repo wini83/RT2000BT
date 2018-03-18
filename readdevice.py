@@ -30,6 +30,7 @@ class AnyDevice(gatt.Device):
     battery = 255
     ist_wert = 0
     soll_wert = 0
+    mode = -1
     def services_resolved(self):
         super().services_resolved()
 
@@ -73,6 +74,12 @@ class AnyDevice(gatt.Device):
             print("read")
         if(characteristic.uuid == STATUS_ID):
             print("succes!")
+            bytes_data = struct.unpack('bbb', value)
+            print (bytes_data[0])
+            self.is_status_readed = True
+            self.mode = bytes_data[0]
+            if self.mode==0:
+                print("Auto")
         #print(domobridge.set_temp(1802, ist))
         #print(domobridge.set_temp(1801, soll))
         #self.disconnect()
