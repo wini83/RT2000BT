@@ -56,6 +56,7 @@ class AnyDevice(gatt.Device):
         print("[%s] Disconnected" % (self.mac_address))    
 
     def characteristic_value_updated(self, characteristic, value):
+        print("loop")
         if(characteristic.uuid == SETTINGS_ID and self.is_settings_readed == False):
             liczby = struct.unpack('bbbbbbb', value)
             self.ist_wert = str(liczby[0]/2)
@@ -69,8 +70,8 @@ class AnyDevice(gatt.Device):
             d for d in device_information_service.characteristics
                 if d.uuid == STATUS_ID)           
             actual.read_value()
-        if(characteristic.uuid == STATUS_ID):
-            print("succes!")
+            if(characteristic.uuid == STATUS_ID):
+                print("succes!")
         #print(domobridge.set_temp(1802, ist))
         #print(domobridge.set_temp(1801, soll))
         self.disconnect()
