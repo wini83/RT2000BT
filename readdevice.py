@@ -80,10 +80,11 @@ class AnyDevice(gatt.Device):
             self.mode = bytes_data[0]
             if self.mode==0:
                 print("Auto")
-        #print(domobridge.set_temp(1802, ist))
-        #print(domobridge.set_temp(1801, soll))
-        #self.disconnect()
-        #self.manager.stop()
+        if(self.is_settings_readed == True and self.is_status_readed == True):
+            #print(domobridge.set_temp(1802, ist))
+            #print(domobridge.set_temp(1801, soll))
+            self.disconnect()
+            self.manager.stop()
         
     def characteristic_write_value_succeeded(self, characteristic):
         print("Write successful.")
