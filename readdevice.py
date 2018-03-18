@@ -57,7 +57,7 @@ class AnyDevice(gatt.Device):
 
     def characteristic_value_updated(self, characteristic, value):
         print("loop")
-        if(characteristic.uuid == SETTINGS_ID and self.is_settings_readed == False):
+        if(characteristic.uuid == SETTINGS_ID):
             liczby = struct.unpack('bbbbbbb', value)
             self.ist_wert = str(liczby[0]/2)
             self.soll_wert= str(liczby[1]/2)
@@ -68,11 +68,11 @@ class AnyDevice(gatt.Device):
             if s.uuid == SERVICE_ID)
             actual = next(
             d for d in device_information_service.characteristics
-                if d.uuid == STATUS_ID)           
+                if d.uuid == STATUS_ID)        
             actual.read_value()
             print("read")
-            if(characteristic.uuid == STATUS_ID):
-                print("succes!")
+        if(characteristic.uuid == STATUS_ID):
+            print("succes!")
         #print(domobridge.set_temp(1802, ist))
         #print(domobridge.set_temp(1801, soll))
         self.disconnect()
