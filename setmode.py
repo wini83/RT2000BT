@@ -76,8 +76,10 @@ class AnyDevice(gatt.Device):
             d for d in device_information_service.characteristics
                 if d.uuid == STATUS_ID)
             if(domobridge.is_Switch_On(MANUAL_IDX)):
+                print("Trying to set manual..")
                 actual.write_value(bytearray(b'\x01\x80\x80'))
             else:
+                print("Trying to set auto..")
                 actual.write_value(bytearray(b'\x00\x80\x80'))
         elif(characteristic.uuid == STATUS_ID):
             print("Status updated!")
