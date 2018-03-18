@@ -74,8 +74,11 @@ class AnyDevice(gatt.Device):
                 if s.uuid == SERVICE_ID)
             actual = next(
             d for d in device_information_service.characteristics
-                if d.uuid == STATUS_ID)           
-            actual.write_value(bytearray(b'\x01\x80\x80'))
+                if d.uuid == STATUS_ID)
+            if(domobridge.is_Switch_On(MANUAL_IDX)):
+                actual.write_value(bytearray(b'\x01\x80\x80'))
+            else:
+                actual.write_value(bytearray(b'\x00\x80\x80'))
         elif(characteristic.uuid == STATUS_ID):
             print("Status updated!")
             self.disconnect()
@@ -83,6 +86,8 @@ class AnyDevice(gatt.Device):
 
     def characteristic_write_value_failed(self, characteristic, error):
         print("Write failed. "+str(error))
+        self.disconnect()
+        self.manager.stop()
 
 
 device = AnyDevice(mac_address='9E:5F:48:89:87:D5', manager=manager)
