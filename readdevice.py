@@ -73,16 +73,30 @@ class AnyDevice(gatt.Device):
             actual.read_value()
             print("read")
         if(characteristic.uuid == STATUS_ID):
-            print("succes!")
+            print("status loop!")
             bytes_data = struct.unpack('bbb', value)
             print (bytes_data[0])
             self.is_status_readed = True
             self.mode = bytes_data[0]
-            if self.mode==0:
-                print("Auto")
-        if(self.is_settings_readed == True and self.is_status_readed == True):
+            print(str(self.mode))
+            device_information_service = next(
+            s for s in self.services
+            if s.uuid == SERVICE_ID)
+            actual = next(
+            d for d in device_information_service.characteristics
+                if d.uuid == BATTERY_ID)        
+            actual.read_value()
+        if(characteristic.uuid == BATTERY_ID):
+            print("battery loop")
+            bytes_data = struct.unpack('b', value)
+            print (bytes_data[0])
+            self.is_battery_readed = True
+            self.battery = bytes_data[0]
+            print("Battery:"+str(self.battery))
+        if(self.is_settings_readed == True and self.is_status_readed == True and self.is_battery_readed == True):
             #print(domobridge.set_temp(1802, ist))
             #print(domobridge.set_temp(1801, soll))
+            print("alles ok! disconnecting...")
             self.disconnect()
             self.manager.stop()
         
