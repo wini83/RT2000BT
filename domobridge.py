@@ -28,6 +28,24 @@ def domoticz_set_value(idx,value):
     data = json.load(reader(response))
     return data
 
+def domoticz_set_switch(idx,value):
+    if(value == 0):
+        command = "Off"
+    elif(value == 1):
+        command = "On"
+    else:
+        data_error = {}
+        data_error['error'] = 'Wrong Parameter'
+        json_data = json.dumps(data_error)
+        return json_data
+    url = "http://"+DOMO_IP+":"+DOMO_PORT+"/json.htm?type=command&param=switchlight&idx="+str(idx)+"&switchcmd="+command
+    req = urllib.request.Request(url)
+    response = urllib.request.urlopen(req)
+
+    reader = codecs.getreader("utf-8")
+    data = json.load(reader(response))
+    return data
+
 
 def is_Switch_On(idx):
     status_idx = domoticz_getJson(idx)
@@ -40,6 +58,18 @@ def is_Switch_On(idx):
             return False
     except:
         return False
+
+def set_switch(idx,value):
+    status_idx = domoticz_set_switch(idx, value)
+    try:
+        dev_status = status_idx["status"]
+        if dev_status == "OK":
+            return True
+        else:
+            return False
+    except:
+        return False
+
     
 def print_raw_json(status_idx):
     print(json.dumps(status_idx, indent=4, sort_keys=True))
@@ -60,7 +90,7 @@ def read_SetPoint(idx):
     except:
         return -255
     
-def set_temp(idx,value):
+def set_value(idx,value):
     status_idx = domoticz_set_value(idx, value)    
     try:
         dev_status = status_idx["status"]
