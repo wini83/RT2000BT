@@ -70,6 +70,7 @@ class AnyDevice(gatt.Device):
             d for d in device_information_service.characteristics
                 if d.uuid == STATUS_ID)           
             actual.read_value()
+            print("read")
             if(characteristic.uuid == STATUS_ID):
                 print("succes!")
         #print(domobridge.set_temp(1802, ist))
