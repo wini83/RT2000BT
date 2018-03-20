@@ -77,10 +77,10 @@ class AnyDevice(gatt.Device):
                 if d.uuid == STATUS_ID)
             if(domobridge.is_Switch_On(MANUAL_IDX)):
                 print("Trying to set manual..")
-                actual.write_value(bytearray(b'\x01\x80\x80'))
+                actual.write_value(bytearray(b'\x01'))
             else:
                 print("Trying to set auto..")
-                actual.write_value(bytearray(b'\x00\x80\x80'))
+                actual.write_value(bytearray(b'\x00'))
         elif(characteristic.uuid == STATUS_ID):
             print("Status updated!")
             self.disconnect()
