@@ -78,7 +78,8 @@ def read_temp(idx):
     status_idx = domoticz_getJson(idx)
     try:
         dev_temp = status_idx["result"][0]["Temp"]
-        return dev_temp
+        dev_temp_int = int(dev_temp)
+        return dev_temp_int
     except:
         return -255
     
@@ -86,7 +87,8 @@ def read_SetPoint(idx):
     status_idx = domoticz_getJson(idx)
     try:
         dev_temp = status_idx["result"][0]["SetPoint"]
-        return dev_temp
+        dev_temp_int = int(dev_temp)
+        return dev_temp_int
     except:
         return -255
     
