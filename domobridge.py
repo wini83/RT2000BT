@@ -87,6 +87,7 @@ def read_SetPoint(idx):
     status_idx = domoticz_getJson(idx)
     try:
         dev_temp = status_idx["result"][0]["SetPoint"]
+        print(dev_temp)
         dev_temp_int = int(dev_temp)
         return dev_temp_int
     except:
