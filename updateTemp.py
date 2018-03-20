@@ -67,21 +67,25 @@ class AnyDevice(gatt.Device):
         if(characteristic.uuid == SETTINGS_ID):
             self.bajty = struct.unpack('bbbbbbb', value)
             self.is_settings_readed = True
-            print("Temperatures readed")
-            for line in self.bajty:
-                print(line)
+            print("Temperatures readed, actual values are:")
+            print(self.bajty, end=" ")
             self.bajty = list(self.bajty)
-            self.bajty[1]=18*2
-            print("-------")
-            for line in self.bajty:
-                print(line)
-            device_information_service = next(
-            s for s in self.services
-            if s.uuid == SERVICE_ID)
-            actual = next(
-            d for d in device_information_service.characteristics
-                if d.uuid == SETTINGS_ID)    
-            actual.write_value(struct.pack('bbbbbbb', self.bajty[0],self.bajty[1],self.bajty[2],self.bajty[3],self.bajty[4],self.bajty[5],self.bajty[6]))
+            settemp = domobridge.read_SetPoint(SETTEMP_IDX)
+            if(settemp != -255):
+                self.bajty[1]=settemp*2
+                print("new values:")
+                print(self.bajty, end=" ")
+                device_information_service = next(
+                s for s in self.services
+                if s.uuid == SERVICE_ID)
+                actual = next(
+                d for d in device_information_service.characteristics
+                    if d.uuid == SETTINGS_ID)    
+                actual.write_value(struct.pack('bbbbbbb', self.bajty[0],self.bajty[1],self.bajty[2],self.bajty[3],self.bajty[4],self.bajty[5],self.bajty[6]))
+            else:
+                print("Error reading domoticz value")
+                self.disconnect()
+                self.manager.stop()
         
     def characteristic_write_value_succeeded(self, characteristic):
         if(characteristic.uuid == PIN_ID):
