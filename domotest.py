@@ -22,4 +22,6 @@ MANUAL_IDX = 2132
 
 #print(domobridge.set_value(BATTERY_IDX, 80))
 
-print(domobridge.is_Switch_On(MANUAL_IDX))
+#print(domobridge.is_Switch_On(MANUAL_IDX))
+
+print(domobridge.read_SetPoint(SETTEMP_IDX))
