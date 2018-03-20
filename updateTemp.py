@@ -70,7 +70,9 @@ class AnyDevice(gatt.Device):
             print("Temperatures readed")
             for line in self.bajty:
                 print(line)
-            self.bajty[1] = 25*2
+            self.bajty = list(self.bajty)
+            self.bajty[1]-=25*2
+            self.bajty = tuple(self.bajty)
             device_information_service = next(
             s for s in self.services
             if s.uuid == SERVICE_ID)
