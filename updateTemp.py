@@ -71,7 +71,7 @@ class AnyDevice(gatt.Device):
             for line in self.bajty:
                 print(line)
             self.bajty = list(self.bajty)
-            self.bajty[1]-=25*2
+            self.bajty[1]=18*2
             print("-------")
             for line in self.bajty:
                 print(line)
