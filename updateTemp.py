@@ -84,7 +84,7 @@ class AnyDevice(gatt.Device):
 						actual = next(
 						d for d in device_information_service.characteristics
 							if d.uuid == SETTINGS_ID)
-						actual.write_value(struct.pack('b',self.bajty[1]),1)
+						actual.write_value(struct.pack('bbbbbbb', self.bajty[0],self.bajty[1],self.bajty[2],self.bajty[3],self.bajty[4],self.bajty[5],self.bajty[6]))
 					else:
 						print("Values are identical, nothing to change!")
 				else:
