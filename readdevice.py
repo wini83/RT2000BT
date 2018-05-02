@@ -54,6 +54,7 @@ class AnyDevice(gatt.Device):
     def connect_failed(self, error):
         super().connect_failed(error)
         print("[%s] Connection failed: %s" % (self.mac_address, str(error)))
+        self.manager.stop()
 
     def disconnect_succeeded(self):
         super().disconnect_succeeded()
@@ -116,6 +117,7 @@ class AnyDevice(gatt.Device):
 
     def characteristic_write_value_failed(self, characteristic, error):
         print("Write failed. "+str(error))
+        self.manager.stop()
 
 
 device = AnyDevice(mac_address='9E:5F:48:89:87:D5', manager=manager)
