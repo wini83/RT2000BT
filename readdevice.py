@@ -53,6 +53,7 @@ class AnyDevice(gatt.Device):
 
     def connect_failed(self, error):
         super().connect_failed(error)
+        print("dupa")
         print("[%s] Connection failed: %s" % (self.mac_address, str(error)))
         self.manager.stop()
 
