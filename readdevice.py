@@ -6,6 +6,7 @@ Created on 17 mar 2018
 import gatt
 import struct
 import domobridge
+import sys
 
 SETTEMP_IDX = 1801
 TEMPACT_IDX = 1802
@@ -56,10 +57,12 @@ class AnyDevice(gatt.Device):
         print("dupa")
         print("[%s] Connection failed: %s" % (self.mac_address, str(error)))
         self.manager.stop()
+        sys.exit()
 
     def disconnect_succeeded(self):
         super().disconnect_succeeded()
-        print("[%s] Disconnected" % (self.mac_address))    
+        print("[%s] Disconnected" % (self.mac_address))   
+         
 
     def characteristic_value_updated(self, characteristic, value):
         print("begin loop")
