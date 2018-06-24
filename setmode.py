@@ -8,6 +8,7 @@ Created on 18 mar 2018
 import gatt
 import struct
 import domobridge
+import sys
 
 SETTEMP_IDX = 1801
 TEMPACT_IDX = 1802
@@ -56,6 +57,7 @@ class AnyDevice(gatt.Device):
     def connect_failed(self, error):
         super().connect_failed(error)
         print("[%s] Connection failed: %s" % (self.mac_address, str(error)))
+        sys.exit()
 
     def disconnect_succeeded(self):
         super().disconnect_succeeded()
