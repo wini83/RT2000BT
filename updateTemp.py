@@ -73,7 +73,7 @@ class AnyDevice(gatt.Device):
 			print(self.bajty, end=" ")
 			self.bajty = list(self.bajty)
 			settemp = domobridge.read_SetPoint(SETTEMP_IDX)
-			print("sasa"+str(settemp))
+			print("Temp setted in domoticz:"+str(settemp))
 			if(settemp != -255):
 				if(settemp>15 and settemp < 30):
 					if(settemp*2 != self.bajty[1]):
