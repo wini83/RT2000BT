@@ -8,7 +8,7 @@ import struct
 import domobridge
 import sys
 
-SETTEMP_IDX = 1801
+SETTEMP_IDX = 4094
 TEMPACT_IDX = 1802
 BATTERY_IDX = 1803
 MANUAL_IDX = 2132
