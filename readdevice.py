@@ -29,7 +29,7 @@ DOMOTICZ_IP = "192.168.1.100"
 DOMOTICZ_PORT = "8050"
 
 
-class AnyDevice(gatt.Device):
+class ReadDevice(gatt.Device):
     is_settings_readed = False
     is_status_readed = False
     is_battery_readed = False
@@ -126,7 +126,8 @@ class AnyDevice(gatt.Device):
         self.manager.stop()
 
 manager = gatt.DeviceManager(adapter_name='hci0')
-device = AnyDevice(mac_address='9E:5F:48:89:87:D5', manager=manager)
+device = ReadDevice(mac_address='9E:5F:48:89:87:D5', manager=manager)
 device.connect()
 manager.run()
 print ("dupa")
+print(device.battery)
