@@ -5,7 +5,8 @@ Created on 17 mar 2018
 '''
 
 import gatt
-from rt2000BT.downloadDevice import downloadDevice
+import rt2000BT
+# from rt2000BT.downloadDevice import downloadDevice
 
 SETTEMP_IDX = 4094
 TEMPACT_IDX = 1802
@@ -19,7 +20,7 @@ DOMOTICZ_PORT = "8050"
 
 
 manager = gatt.DeviceManager(adapter_name='hci0')
-device = downloadDevice(mac_address='9E:5F:48:89:87:D5', manager=manager)
+device = rt2000BT.downloadDevice(mac_address='9E:5F:48:89:87:D5', manager=manager)
 device.connect()
 manager.run()
 print ("dupa")

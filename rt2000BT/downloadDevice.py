@@ -83,7 +83,7 @@ class downloadDevice(gatt.Device):
                 if d.uuid == BATTERY_ID)        
             actual.read_value()
         if(characteristic.uuid == BATTERY_ID):
-            print("characteristic STATUS received!")
+            print("characteristic BATTERY received!")
             bytes_data = struct.unpack('b', value)
             self._is_battery_readed = True
             self.battery = bytes_data[0]
