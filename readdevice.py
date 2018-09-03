@@ -5,7 +5,7 @@ Created on 17 mar 2018
 '''
 
 import gatt
-from rt2000BT.downloadDevice import downloadDevice
+from rt2000BT import downloadDevice
 
 SETTEMP_IDX = 4094
 TEMPACT_IDX = 1802
