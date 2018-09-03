@@ -5,7 +5,6 @@ Created on 17 mar 2018
 '''
 import gatt
 import struct
-import domobridgeOld
 import sys
 import domobridge
 
@@ -103,10 +102,6 @@ class ReadDevice(gatt.Device):
             self.battery = bytes_data[0]
             print("Battery:"+str(self.battery))
         if(self.is_settings_readed == True and self.is_status_readed == True and self.is_battery_readed == True):
-            print(domobridgeOld.set_value(TEMPACT_IDX, self.ist_wert))
-            print(domobridgeOld.set_value(SETTEMP_IDX, self.soll_wert))
-            print(domobridgeOld.set_value(BATTERY_IDX, self.battery))
-            print(domobridgeOld.set_switch(MANUAL_IDX, self.mode))
             print("alles ok! disconnecting...")
             self.disconnect()
             self.manager.stop()
