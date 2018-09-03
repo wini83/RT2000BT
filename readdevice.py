@@ -41,6 +41,6 @@ if(valve.is_download_succesful):
     print("Current Temp: domoticz={}C; valve ={}C".format(dev_act.temp,valve.current_temp))
     if(valve.current_temp != dev_act.temp):
         dev_act.update(0, str(valve.current_temp))
-    print("Current Temp: domoticz={}C; valve ={}C".format(dev_set.temp,valve.setpoint_temp))
+    print("Setpoint: domoticz={}C; valve ={}C".format(dev_set.temp,valve.setpoint_temp))
     if(valve.setpoint_temp != dev_set.temp):
-        dev_act.update(0, str(valve.current_temp))
+        dev_set.update(0, str(valve.setpoint_temp))
