@@ -7,7 +7,7 @@ Created on 18 mar 2018
 
 import gatt
 import struct
-import domobridge
+import domobridgeOld
 import sys
 
 SETTEMP_IDX = 1801
@@ -78,7 +78,7 @@ class AnyDevice(gatt.Device):
             actual = next(
             d for d in device_information_service.characteristics
                 if d.uuid == STATUS_ID)
-            if(domobridge.is_Switch_On(MANUAL_IDX)):
+            if(domobridgeOld.is_Switch_On(MANUAL_IDX)):
                 print("Trying to set manual..")
                 actual.write_value(bytearray(b'\x01'))
             else:

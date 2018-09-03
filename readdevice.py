@@ -5,8 +5,9 @@ Created on 17 mar 2018
 '''
 import gatt
 import struct
-import domobridge
+import domobridgeOld
 import sys
+import domobridge
 
 SETTEMP_IDX = 4094
 TEMPACT_IDX = 1802
@@ -23,9 +24,10 @@ BATTERY_ID = "47e9ee2c-47e9-11e4-8939-164230d1df67"
 
 PIN_ID = "47e9ee30-47e9-11e4-8939-164230d1df67"
 
+DOMOTICZ_IP = "192.168.1.100"
 
+DOMOTICZ_PORT = "8050"
 
-manager = gatt.DeviceManager(adapter_name='hci0')
 
 class AnyDevice(gatt.Device):
     is_settings_readed = False
@@ -101,10 +103,10 @@ class AnyDevice(gatt.Device):
             self.battery = bytes_data[0]
             print("Battery:"+str(self.battery))
         if(self.is_settings_readed == True and self.is_status_readed == True and self.is_battery_readed == True):
-            print(domobridge.set_value(TEMPACT_IDX, self.ist_wert))
-            print(domobridge.set_value(SETTEMP_IDX, self.soll_wert))
-            print(domobridge.set_value(BATTERY_IDX, self.battery))
-            print(domobridge.set_switch(MANUAL_IDX, self.mode))
+            print(domobridgeOld.set_value(TEMPACT_IDX, self.ist_wert))
+            print(domobridgeOld.set_value(SETTEMP_IDX, self.soll_wert))
+            print(domobridgeOld.set_value(BATTERY_IDX, self.battery))
+            print(domobridgeOld.set_switch(MANUAL_IDX, self.mode))
             print("alles ok! disconnecting...")
             self.disconnect()
             self.manager.stop()
@@ -123,8 +125,8 @@ class AnyDevice(gatt.Device):
         print("Write failed. "+str(error))
         self.manager.stop()
 
-
+manager = gatt.DeviceManager(adapter_name='hci0')
 device = AnyDevice(mac_address='9E:5F:48:89:87:D5', manager=manager)
 device.connect()
-
 manager.run()
+print ("dupa")

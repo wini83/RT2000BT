@@ -13,7 +13,7 @@ Created on 18 mar 2018
 
 import gatt
 import struct
-import domobridge
+import domobridgeOld
 import sys
 
 SETTEMP_IDX = 1801
@@ -33,7 +33,7 @@ PIN_ID = "47e9ee30-47e9-11e4-8939-164230d1df67"
 
 
 
-manager = gatt.DeviceManager(adapter_name='hci0')
+
 
 class AnyDevice(gatt.Device):
 	bajty = []
@@ -72,7 +72,7 @@ class AnyDevice(gatt.Device):
 			print("Temperatures readed, actual values are:")
 			print(self.bajty, end=" ")
 			self.bajty = list(self.bajty)
-			settemp = domobridge.read_SetPoint(SETTEMP_IDX)
+			settemp = domobridgeOld.read_SetPoint(SETTEMP_IDX)
 			print("Temp setted in domoticz:"+str(settemp))
 			if(settemp != -255):
 				if(settemp>15 and settemp < 30):
@@ -117,7 +117,7 @@ class AnyDevice(gatt.Device):
 		self.disconnect()
 		self.manager.stop()
 
-
+manager = gatt.DeviceManager(adapter_name='hci0')
 device = AnyDevice(mac_address='9E:5F:48:89:87:D5', manager=manager)
 device.connect()
 manager.run()
