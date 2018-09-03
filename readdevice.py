@@ -26,4 +26,4 @@ if(device.is_download_succesful):
     print("Current Temp = " + str(device.current_temp))
     print("Setpoint = " + str(device.setpoint_temp))
     print("Battery = " + str(device.battery))
-    print("Mode = " + str(device.modeauto))
+    print("Mode = " + str(device.mode_auto))
