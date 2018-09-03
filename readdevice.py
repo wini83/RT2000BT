@@ -25,7 +25,7 @@ valve.connect()
 manager.run()
 print("-------------------------------------------------")
 if(valve.is_download_succesful):
-    print("Current Temp = " + str(valve.current_temp))
+    
     print("Setpoint = " + str(valve.setpoint_temp))
     print("Battery = " + str(valve.battery))
     if(valve.mode_auto == 0):
@@ -38,5 +38,6 @@ if(valve.is_download_succesful):
     dev_act = dom.Device(server,TEMPACT_IDX)
     dev_set = dom.Device(server,SETPOINT_IDX)
     dev_mode =  dom.Device(server,MANUAL_IDX)
+    print("Current Temp: domoticz={}°C; valve ={}°C").format(dev_act.temp,valve.current_temp)
     if(valve.current_temp != dev_act.temp):
         dev_act.update(0, str(valve.current_temp))
