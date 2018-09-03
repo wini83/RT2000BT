@@ -30,13 +30,13 @@ PIN_ID = "47e9ee30-47e9-11e4-8939-164230d1df67"
 manager = gatt.DeviceManager(adapter_name='hci0')
 
 class AnyDevice(gatt.Device):
-    is_settings_readed = False
-    is_status_readed = False
-    is_battery_readed = False
+    _is_settings_readed = False
+    _is_status_readed = False
+    _is_battery_readed = False
     battery = 255
-    ist_wert = 0
-    soll_wert = 0
-    mode = -1
+    current_temp = 0
+    setpoint_temp = 0
+    mode_auto = -1
     def services_resolved(self):
         super().services_resolved()
 

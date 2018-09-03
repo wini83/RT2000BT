@@ -37,7 +37,7 @@ PIN_ID = "47e9ee30-47e9-11e4-8939-164230d1df67"
 
 class AnyDevice(gatt.Device):
 	bajty = []
-	is_settings_readed = False
+	_is_settings_readed = False
 	def services_resolved(self):
 		super().services_resolved()
 
@@ -68,7 +68,7 @@ class AnyDevice(gatt.Device):
 		print("begin loop")
 		if(characteristic.uuid == SETTINGS_ID):
 			self.bajty = struct.unpack('bbbbbbb', value)
-			self.is_settings_readed = True
+			self._is_settings_readed = True
 			print("Temperatures readed, actual values are:")
 			print(self.bajty, end=" ")
 			self.bajty = list(self.bajty)

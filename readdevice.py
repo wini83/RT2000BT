@@ -28,14 +28,16 @@ DOMOTICZ_IP = "192.168.1.100"
 DOMOTICZ_PORT = "8050"
 
 
-class ReadDevice(gatt.Device):
-    is_settings_readed = False
-    is_status_readed = False
-    is_battery_readed = False
+class DownloadDevice(gatt.Device):
+    _is_settings_readed = False
+    _is_status_readed = False
+    _is_battery_readed = False
     battery = 255
-    ist_wert = 0
-    soll_wert = 0
-    mode = -1
+    current_temp = 0
+    setpoint_temp = 0
+    mode_auto = -1
+    is_download_succesful = False
+    
     def services_resolved(self):
         super().services_resolved()
 
@@ -66,13 +68,12 @@ class ReadDevice(gatt.Device):
          
 
     def characteristic_value_updated(self, characteristic, value):
-        print("begin loop")
         if(characteristic.uuid == SETTINGS_ID):
+            print("characteristic SETTINGS received!")
             liczby = struct.unpack('bbbbbbb', value)
-            self.ist_wert = str(liczby[0]/2)
-            self.soll_wert= str(liczby[1]/2)
-            self.is_settings_readed = True
-            print("Temperatures readed")
+            self.current_temp = str(liczby[0]/2)
+            self.setpoint_temp= str(liczby[1]/2)
+            self._is_settings_readed = True
             device_information_service = next(
             s for s in self.services
             if s.uuid == SERVICE_ID)
@@ -80,13 +81,12 @@ class ReadDevice(gatt.Device):
             d for d in device_information_service.characteristics
                 if d.uuid == STATUS_ID)        
             actual.read_value()
-            print("read")
         if(characteristic.uuid == STATUS_ID):
-            print("status loop!")
+            print("characteristic STATUS received!")
             bytes_data = struct.unpack('bbb', value)
-            self.is_status_readed = True
-            self.mode = bytes_data[0]
-            print(str(self.mode))
+            self._is_status_readed = True
+            self.mode_auto = bytes_data[0]
+            print(str(self.mode_auto))
             device_information_service = next(
             s for s in self.services
             if s.uuid == SERVICE_ID)
@@ -95,14 +95,13 @@ class ReadDevice(gatt.Device):
                 if d.uuid == BATTERY_ID)        
             actual.read_value()
         if(characteristic.uuid == BATTERY_ID):
-            print("battery loop")
+            print("characteristic STATUS received!")
             bytes_data = struct.unpack('b', value)
             print (bytes_data[0])
-            self.is_battery_readed = True
+            self._is_battery_readed = True
             self.battery = bytes_data[0]
-            print("Battery:"+str(self.battery))
-        if(self.is_settings_readed == True and self.is_status_readed == True and self.is_battery_readed == True):
-            print("alles ok! disconnecting...")
+        if(self._is_settings_readed == True and self._is_status_readed == True and self._is_battery_readed == True):
+            self.is_download_succesful = True
             self.disconnect()
             self.manager.stop()
         
@@ -121,7 +120,7 @@ class ReadDevice(gatt.Device):
         self.manager.stop()
 
 manager = gatt.DeviceManager(adapter_name='hci0')
-device = ReadDevice(mac_address='9E:5F:48:89:87:D5', manager=manager)
+device = DownloadDevice(mac_address='9E:5F:48:89:87:D5', manager=manager)
 device.connect()
 manager.run()
 print ("dupa")
