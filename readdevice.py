@@ -86,7 +86,6 @@ class DownloadDevice(gatt.Device):
             bytes_data = struct.unpack('bbb', value)
             self._is_status_readed = True
             self.mode_auto = bytes_data[0]
-            print(str(self.mode_auto))
             device_information_service = next(
             s for s in self.services
             if s.uuid == SERVICE_ID)
@@ -97,7 +96,6 @@ class DownloadDevice(gatt.Device):
         if(characteristic.uuid == BATTERY_ID):
             print("characteristic STATUS received!")
             bytes_data = struct.unpack('b', value)
-            print (bytes_data[0])
             self._is_battery_readed = True
             self.battery = bytes_data[0]
         if(self._is_settings_readed == True and self._is_status_readed == True and self._is_battery_readed == True):
