@@ -60,8 +60,8 @@ class downloadDevice(gatt.Device):
         if(characteristic.uuid == SETTINGS_ID):
             print("characteristic SETTINGS received!")
             liczby = struct.unpack('bbbbbbb', value)
-            self.current_temp = str(liczby[0]/2)
-            self.setpoint_temp= str(liczby[1]/2)
+            self.current_temp = liczby[0]/2
+            self.setpoint_temp= liczby[1]/2
             self._is_settings_readed = True
             device_information_service = next(
             s for s in self.services
