@@ -35,8 +35,8 @@ if(valve.is_download_succesful):
     else:
         print("Wrong Mode")
     server = dom.Server(address=DOMOTICZ_IP, port=DOMOTICZ_PORT)
-    dev_act = dom.device(server,TEMPACT_IDX)
-    dev_set = dom.device(server,SETPOINT_IDX)
-    dev_mode =  dom.device(server,MANUAL_IDX)
+    dev_act = dom.Device(server,TEMPACT_IDX)
+    dev_set = dom.Device(server,SETPOINT_IDX)
+    dev_mode =  dom.Device(server,MANUAL_IDX)
     if(valve.current_temp != dev_act.temp):
         dev_act.update(0, str(valve.current_temp))
