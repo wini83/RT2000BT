@@ -14,7 +14,6 @@ BATTERY_IDX = 1803
 MANUAL_IDX = 2132
 
 DOMOTICZ_IP = "192.168.1.100"
-
 DOMOTICZ_PORT = "8050"
 
 
@@ -37,6 +36,8 @@ if(valve.is_download_succesful):
     dev_set = dom.Device(server,SETPOINT_IDX)
     dev_mode =  dom.Device(server,MANUAL_IDX)
     print("Current Temp: domoticz={}C; valve ={}C".format(dev_act.temp,valve.current_temp))
+    print(type(dev_act.temp))
+    print(type(valve.current_temp))
     if(valve.current_temp != dev_act.temp):
         print("Updating Current Temp in domoticz...")
         dev_act.update(0, "{}&battery={}".format(valve.current_temp,valve.battery))
