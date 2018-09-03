@@ -23,4 +23,7 @@ device = rt2000BT.downloadDevice(mac_address='9E:5F:48:89:87:D5', manager=manage
 device.connect()
 manager.run()
 if(device.is_download_succesful):
-    print("dupa")
+    print("Current Temp = " + str(device.current_temp))
+    print("Setpoint = " + str(device.setpoint_temp))
+    print("Battery = " + str(device.battery))
+    print("Mode = " + str(device.modeauto))
