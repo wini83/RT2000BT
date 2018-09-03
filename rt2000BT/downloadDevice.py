@@ -17,7 +17,7 @@ BATTERY_ID = "47e9ee2c-47e9-11e4-8939-164230d1df67"
 
 PIN_ID = "47e9ee30-47e9-11e4-8939-164230d1df67"
 
-class DownloadDevice(gatt.Device):
+class downloadDevice(gatt.Device):
     _is_settings_readed = False
     _is_status_readed = False
     _is_battery_readed = False
