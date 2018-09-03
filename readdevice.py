@@ -20,7 +20,7 @@ DOMOTICZ_PORT = "8050"
 
 
 manager = gatt.DeviceManager(adapter_name='hci0')
-device = valve.DownloadDevice(mac_address='9E:5F:48:89:87:D5', manager=manager)
+device = valve.downloadDevice(mac_address='9E:5F:48:89:87:D5', manager=manager)
 device.connect()
 manager.run()
 print ("dupa")
