@@ -53,7 +53,8 @@ class downloadDevice(gatt.Device):
 
     def disconnect_succeeded(self):
         super().disconnect_succeeded()
-        print("[%s] Disconnected" % (self.mac_address))   
+        print("[%s] Disconnected" % (self.mac_address))
+        self.manager.stop()  
          
 
     def characteristic_value_updated(self, characteristic, value):
@@ -90,7 +91,6 @@ class downloadDevice(gatt.Device):
         if(self._is_settings_readed == True and self._is_status_readed == True and self._is_battery_readed == True):
             self.is_download_succesful = True
             self.disconnect()
-            self.manager.stop()
         
     def characteristic_write_value_succeeded(self, characteristic):
         print("Write successful.")
