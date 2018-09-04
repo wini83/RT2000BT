@@ -18,7 +18,7 @@ BATTERY_ID = "47e9ee2c-47e9-11e4-8939-164230d1df67"
 
 PIN_ID = "47e9ee30-47e9-11e4-8939-164230d1df67"
 
-Modus = Enum("Modus","poll update_temp set_mode")
+Modus = Enum("Modus","unknown poll update_temp set_mode")
 
 
 class downloadDevice(gatt.Device):
