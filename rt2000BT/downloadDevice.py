@@ -36,8 +36,8 @@ class downloadDevice(gatt.Device):
     
     def poll(self):
         self.modus = Modus.poll
-        super.connect()
-        super.manager.run()
+        super().connect()
+        super().manager.run()
         
     def set_mode(self, value = False):
         self.modus = Modus.set_mode
