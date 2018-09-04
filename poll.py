@@ -10,7 +10,6 @@ import domobridge as dom
 
 SETPOINT_IDX = 4094
 TEMPACT_IDX = 1802
-BATTERY_IDX = 1803
 MANUAL_IDX = 2132
 
 DOMOTICZ_IP = "192.168.1.100"
@@ -22,7 +21,7 @@ valve = rt2000BT.downloadDevice(mac_address='9E:5F:48:89:87:D5', manager=manager
 valve.connect()
 manager.run()
 print("-------------------------------------------------")
-if(valve.is_download_succesful):    
+if(valve.is_polling_succesful):    
     print("Battery = " + str(valve.battery))
     server = dom.Server(address=DOMOTICZ_IP, port=DOMOTICZ_PORT)
     dev_act = dom.Device(server,TEMPACT_IDX)

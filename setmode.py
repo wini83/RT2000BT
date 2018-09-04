@@ -96,6 +96,3 @@ class AnyDevice(gatt.Device):
 
 
 device = AnyDevice(mac_address='9E:5F:48:89:87:D5', manager=manager)
-device.connect()
-
-manager.run()

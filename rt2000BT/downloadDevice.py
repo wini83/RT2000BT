@@ -6,6 +6,7 @@ Created on 3 wrz 2018
 import gatt
 import struct
 import sys
+from enum import Enum
 
 SERVICE_ID = "47e9ee00-47e9-11e4-8939-164230d1df67"
 
@@ -17,6 +18,9 @@ BATTERY_ID = "47e9ee2c-47e9-11e4-8939-164230d1df67"
 
 PIN_ID = "47e9ee30-47e9-11e4-8939-164230d1df67"
 
+Modus = Enum("unknown","poll","update_temp","set_mode")
+
+
 class downloadDevice(gatt.Device):
     _is_settings_readed = False
     _is_status_readed = False
@@ -25,7 +29,22 @@ class downloadDevice(gatt.Device):
     current_temp = 0
     setpoint_temp = 0
     mode_auto = -1
-    is_download_succesful = False
+    desired_temp = 0
+    desired_mode = False;
+    is_polling_succesful = False
+    modus = Modus.unknown
+    
+    def poll(self):
+        self.modus = Modus.poll
+        super.connect()
+        super.manager.run()
+        
+    def set_mode(self, value = False):
+        self.modus = Modus.set_mode
+        self.desired_mode = value;
+        super.connect()
+        super.manager.run()
+        
     
     def services_resolved(self):
         super().services_resolved()
@@ -40,6 +59,7 @@ class downloadDevice(gatt.Device):
             if c.uuid == PIN_ID)
 
         firmware_version_characteristic.write_value(bytearray(b'\x00\x00\x00\x00'))
+        
     def connect_succeeded(self):
         super().connect_succeeded()
         print("[%s] Connected" % (self.mac_address))
@@ -89,11 +109,10 @@ class downloadDevice(gatt.Device):
             self._is_battery_readed = True
             self.battery = bytes_data[0]
         if(self._is_settings_readed == True and self._is_status_readed == True and self._is_battery_readed == True):
-            self.is_download_succesful = True
+            self.is_polling_succesful = True
             self.disconnect()
-        
-    def characteristic_write_value_succeeded(self, characteristic):
-        print("Write successful.")
+            
+    def write_value_succeeded_poll(self,characteristic):
         device_information_service = next(
             s for s in self.services
             if s.uuid == SERVICE_ID)
@@ -101,6 +120,35 @@ class downloadDevice(gatt.Device):
         d for d in device_information_service.characteristics
             if d.uuid == SETTINGS_ID)           
         actual.read_value()
+        
+    def write_value_succeeded_setmode(self, characteristic):
+
+        if(characteristic.uuid == PIN_ID):
+            device_information_service = next(
+                s for s in self.services
+                if s.uuid == SERVICE_ID)
+            actual = next(
+            d for d in device_information_service.characteristics
+                if d.uuid == STATUS_ID)
+            if(self.desired_mode):
+                print("Trying to set manual..")
+                actual.write_value(bytearray(b'\x01'))
+            else:
+                print("Trying to set auto..")
+                actual.write_value(bytearray(b'\x00'))
+        elif(characteristic.uuid == STATUS_ID):
+            print("Status updated!")
+            self.disconnect()
+            self.manager.stop()
+        
+    
+        
+    def characteristic_write_value_succeeded(self, characteristic):
+        print("Write successful.")
+        if(self.modus == Modus.poll):
+            self.write_value_succeeded_poll(characteristic)
+        elif(self.modus == Modus.set_mode):
+            self.write_value_succeeded_setmode(characteristic)
 
     def characteristic_write_value_failed(self, characteristic, error):
         print("Write failed. "+str(error))
