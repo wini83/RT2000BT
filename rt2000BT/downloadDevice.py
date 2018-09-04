@@ -122,8 +122,8 @@ class downloadDevice(gatt.Device):
         actual.read_value()
         
     def write_value_succeeded_setmode(self, characteristic):
-
         if(characteristic.uuid == PIN_ID):
+            print("begin loop")
             device_information_service = next(
                 s for s in self.services
                 if s.uuid == SERVICE_ID)
@@ -149,6 +149,7 @@ class downloadDevice(gatt.Device):
         if(self.modus == Modus.poll):
             self.write_value_succeeded_poll(characteristic)
         elif(self.modus == Modus.set_mode):
+            print("set mode")
             self.write_value_succeeded_setmode(characteristic)
 
     def characteristic_write_value_failed(self, characteristic, error):
