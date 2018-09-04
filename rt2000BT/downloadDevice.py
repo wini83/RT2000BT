@@ -37,13 +37,13 @@ class downloadDevice(gatt.Device):
     def poll(self):
         self.modus = Modus.poll
         super().connect()
-        super().manager.run()
+        self.manager.run()
         
     def set_mode(self, value = False):
         self.modus = Modus.set_mode
         self.desired_mode = value;
-        super.connect()
-        super.manager.run()
+        super().connect()
+        self.manager.run()
         
     
     def services_resolved(self):
