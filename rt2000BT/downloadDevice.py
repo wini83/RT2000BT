@@ -66,7 +66,6 @@ class downloadDevice(gatt.Device):
 
     def connect_failed(self, error):
         super().connect_failed(error)
-        print("dupa")
         print("[%s] Connection failed: %s" % (self.mac_address, str(error)))
         self.manager.stop()
         sys.exit()
@@ -123,7 +122,6 @@ class downloadDevice(gatt.Device):
         
     def write_value_succeeded_setmode(self, characteristic):
         if(characteristic.uuid == PIN_ID):
-            print("begin loop")
             device_information_service = next(
                 s for s in self.services
                 if s.uuid == SERVICE_ID)
@@ -145,13 +143,12 @@ class downloadDevice(gatt.Device):
     
         
     def characteristic_write_value_succeeded(self, characteristic):
-        print("Write successful.")
+        print("Write characteristic successful.")
         if(self.modus == Modus.poll):
             self.write_value_succeeded_poll(characteristic)
         elif(self.modus == Modus.set_mode):
-            print("set mode")
             self.write_value_succeeded_setmode(characteristic)
 
     def characteristic_write_value_failed(self, characteristic, error):
-        print("Write failed. "+str(error))
+        print("Write characteristic failed. "+str(error))
         self.manager.stop()
