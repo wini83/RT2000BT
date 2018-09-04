@@ -18,8 +18,7 @@ DOMOTICZ_PORT = "8050"
 
 manager = gatt.DeviceManager(adapter_name='hci0')
 valve = rt2000BT.downloadDevice(mac_address='9E:5F:48:89:87:D5', manager=manager)
-valve.connect()
-manager.run()
+valve.pool()
 print("-------------------------------------------------")
 if(valve.is_polling_succesful):    
     print("Battery = " + str(valve.battery))
