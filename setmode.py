@@ -28,9 +28,9 @@ elif(dev_mode.data == "Off"):
 else:
     print("Wrong Domoticz Device state")
     exit()
-
-# if(valve.is_polling_succesful):
-#       
-# else:
-#     print("Something went wrong...")
+valve.set_mode(desired)
+if(valve.is_polling_succesful):
+    print("ok")
+else:
+    print("Something went wrong...")
 
