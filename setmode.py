@@ -21,7 +21,13 @@ valve = rt2000BT.downloadDevice(mac_address='9E:5F:48:89:87:D5', manager=manager
 server = dom.Server(address=DOMOTICZ_IP, port=DOMOTICZ_PORT)
 dev_mode =  dom.Device(server,MANUAL_IDX)
 desired = False;
-print(dev_mode.data) 
+if(dev_mode.data =="On"):
+    desired = True
+elif(dev_mode.data == "Off"):
+    desired = False
+else:
+    print("Wrong Domoticz Device state")
+    exit()
 
 # if(valve.is_polling_succesful):
 #       
