@@ -138,6 +138,7 @@ class downloadDevice(gatt.Device):
                 actual.write_value(bytearray(b'\x00'))
         elif(characteristic.uuid == STATUS_ID):
             print("Status updated!")
+            self.is_polling_succesful = True
             self.disconnect()
             self.manager.stop()
         

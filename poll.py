@@ -50,3 +50,5 @@ if(valve.is_polling_succesful):
             dev_mode.updateSwitch("On")
     else:
         print("Wrong Mode")
+else:
+    print("Something went wrong...")
