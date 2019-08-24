@@ -13,13 +13,16 @@ Created on 18 mar 2018
 
 import gatt
 import struct
-import domobridgeOld
+import domobridge as dom
 import sys
 
 SETTEMP_IDX = 1801
 TEMPACT_IDX = 1802
 BATTERY_IDX = 1803
 MANUAL_IDX = 2132
+
+DOMOTICZ_IP = "192.168.1.100"
+DOMOTICZ_PORT = "8050"
 
 SERVICE_ID = "47e9ee00-47e9-11e4-8939-164230d1df67"
 
@@ -67,12 +70,14 @@ class AnyDevice(gatt.Device):
 	def characteristic_value_updated(self, characteristic, value):
 		print("begin loop")
 		if(characteristic.uuid == SETTINGS_ID):
+			server = dom.Server(address=DOMOTICZ_IP, port=DOMOTICZ_PORT)
+			dev_set = dom.Device(server,SETTEMP_IDX)
 			self.bajty = struct.unpack('bbbbbbb', value)
 			self._is_settings_readed = True
 			print("Temperatures readed, actual values are:")
 			print(self.bajty, end=" ")
-			self.bajty = list(self.bajty)
-			settemp = domobridgeOld.read_SetPoint(SETTEMP_IDX)
+			self.bajty = list(self.bajty)			
+			settemp = dev_set.temp
 			print("Temp setted in domoticz:"+str(settemp))
 			if(settemp != -255):
 				if(settemp>15 and settemp < 30):
