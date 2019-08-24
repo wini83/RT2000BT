@@ -82,7 +82,7 @@ class AnyDevice(gatt.Device):
 			if(settemp != -255):
 				if(settemp>15 and settemp < 30):
 					if(int(settemp*2) != self.bajty[1]):
-						self.bajty[1]=settemp*2
+						self.bajty[1]=int(settemp*2)
 						print("new values:")
 						print(self.bajty, end=" ")
 						device_information_service = next(
