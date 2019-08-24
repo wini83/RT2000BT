@@ -77,7 +77,7 @@ class AnyDevice(gatt.Device):
 			print("Temperatures readed, actual values are:")
 			print(self.bajty, end=" ")
 			self.bajty = list(self.bajty)			
-			settemp = dev_set.data
+			settemp = float(dev_set.data)
 			print("Temp setted in domoticz:"+str(settemp))
 			if(settemp != -255):
 				if(settemp>15 and settemp < 30):
