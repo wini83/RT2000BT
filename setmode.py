@@ -10,7 +10,7 @@ import rt2000BT
 import domobridge as dom
 
 MANUAL_IDX = 2132
-DOMOTICZ_IP = "192.168.1.100"
+DOMOTICZ_IP = "192.168.2.100"
 DOMOTICZ_PORT = "8050"
 
 print("-------------------------------------------------")

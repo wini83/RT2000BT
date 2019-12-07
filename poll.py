@@ -12,7 +12,7 @@ SETPOINT_IDX = 4094
 TEMPACT_IDX = 1802
 MANUAL_IDX = 2132
 
-DOMOTICZ_IP = "192.168.1.100"
+DOMOTICZ_IP = "192.168.2.100"
 DOMOTICZ_PORT = "8050"
 
 
@@ -29,11 +29,11 @@ if(valve.is_polling_succesful):
     print("Current Temp: domoticz={}C; valve ={}C".format(dev_act.temp,valve.current_temp))
     if(valve.current_temp != dev_act.temp):
         print("Updating Current Temp in domoticz...")
-        dev_act.update(0, "{}&battery={}".format(valve.current_temp,valve.battery))
-    print("Setpoint: domoticz={}C; valve ={}C".format(dev_set.temp,valve.setpoint_temp))
+        dev_act.update(0, "{}&battery={}".format(valve.current_temp, valve.battery))
+    print("Setpoint: domoticz={}C; valve ={}C".format(dev_set.temp, valve.setpoint_temp))
     if(valve.setpoint_temp != dev_set.temp):
         print("Updating Setpoint in domoticz...")
-        dev_set.update(0, "{}&battery={}".format(valve.setpoint_temp,valve.battery))
+        dev_set.update(0, "{}&battery={}".format(valve.setpoint_temp, valve.battery))
     if(valve.mode_auto == 0):
         if(dev_mode.data == "Off"):
             print("MODE: domoticz=auto; valve=auto")
