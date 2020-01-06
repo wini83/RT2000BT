@@ -101,6 +101,7 @@ class downloadDevice(gatt.Device):
                     if d.uuid == BATTERY_ID)
                 actual.read_value()
             except StopIteration:
+                print("characteristic BATTERY not exists")
                 self.battery = 0
                 self.is_polling_succesful = True
                 self.disconnect()
