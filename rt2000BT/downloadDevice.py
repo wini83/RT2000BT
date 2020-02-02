@@ -76,7 +76,7 @@ class downloadDevice(gatt.Device):
         self.manager.stop()
 
     def characteristic_value_updated(self, characteristic, value):
-        if (characteristic.uuid == SETTINGS_ID):
+        if characteristic.uuid == SETTINGS_ID:
             print("characteristic SETTINGS received!")
             liczby = struct.unpack('bbbbbbb', value)
             self.current_temp = liczby[0] / 2
@@ -89,7 +89,7 @@ class downloadDevice(gatt.Device):
                 d for d in device_information_service.characteristics
                 if d.uuid == STATUS_ID)
             actual.read_value()
-        if (characteristic.uuid == STATUS_ID):
+        if characteristic.uuid == STATUS_ID:
             print("characteristic STATUS received!")
             bytes_data = struct.unpack('bbb', value)
             self._is_status_readed = True
@@ -100,7 +100,7 @@ class downloadDevice(gatt.Device):
             try:
                 actual = next(
                     d for d in device_information_service.characteristics
-                    if d.uuid == BATTERY_ID_ALt)
+                    if d.uuid == BATTERY_ID)
                 actual.read_value()
             except StopIteration:
                 print("characteristic BATTERY not exists")
