@@ -14,7 +14,9 @@ STATUS_ID = "47e9ee2a-47e9-11e4-8939-164230d1df67"
 
 SETTINGS_ID = "47e9ee2b-47e9-11e4-8939-164230d1df67"
 
-BATTERY_ID = "01051304-4700-e9e4-8939-164230d1df67" #47e9ee2c-47e9-11e4-8939-164230d1df67"
+BATTERY_ID = "01051304-4700-e9e4-8939-164230d1df67"
+
+BATTERY_ID_ALt = "47e9ee2c-47e9-11e4-8939-164230d1df67"
 
 PIN_ID = "47e9ee30-47e9-11e4-8939-164230d1df67"
 
@@ -98,7 +100,7 @@ class downloadDevice(gatt.Device):
             try:
                 actual = next(
                     d for d in device_information_service.characteristics
-                    if d.uuid == BATTERY_ID)
+                    if d.uuid == BATTERY_ID_ALt)
                 actual.read_value()
             except StopIteration:
                 print("characteristic BATTERY not exists")
