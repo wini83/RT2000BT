@@ -25,6 +25,7 @@ try:
     handle = device.char_write(PIN_ID, pin_array)
     print(handle)
 
-    #value = device.char_read("a1e8f5b1-696b-4e4c-87c6-69dfe0b0093b")
+    value = device.char_read(SETTINGS_ID)
+    print(value)
 finally:
     adapter.stop()
