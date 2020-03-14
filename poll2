@@ -29,7 +29,7 @@ try:
 
     value = device.char_read(SETTINGS_ID)
     value_list = list(value)
-    print(value)
+    print(value_list)
 
     value2 = device.char_read(BATTERY_ID_ALt)
     print(value2)
