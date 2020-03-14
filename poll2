@@ -2,7 +2,7 @@ import pygatt
 
 # The BGAPI backend will attempt to auto-discover the serial device name of the
 # attached BGAPI-compatible USB adapter.
-adapter = pygatt.BGAPIBackend()
+adapter = pygatt.GATTToolBackend()
 
 SERVICE_ID = "47e9ee00-47e9-11e4-8939-164230d1df67"
 
