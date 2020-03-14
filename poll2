@@ -30,6 +30,12 @@ try:
     settings = list(device.char_read(SETTINGS_ID))
     print(settings)
 
+    current_temp = settings[0] / 2
+    setpoint_temp = settings[1] / 2
+
+    print("Current Temp: domoticz=N/A C; valve ={}C".format(current_temp))
+    print("Set Temp: domoticz=N/A C; valve ={}C".format(setpoint_temp))
+
     battery = list(device.char_read(BATTERY_ID_ALt))
     print(battery)
 finally:
