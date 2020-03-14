@@ -36,7 +36,7 @@ try:
     print("Current Temp: domoticz=N/A C; valve ={}C".format(current_temp))
     print("Set Temp: domoticz=N/A C; valve ={}C".format(setpoint_temp))
 
-    battery = list(device.char_read(BATTERY_ID_ALt))
-    print(battery)
+    battery = list(device.char_read(BATTERY_ID_ALt))[0]
+    print("Battery: domoticz=N/A C; valve ={}C".format(battery))
 finally:
     adapter.stop()
