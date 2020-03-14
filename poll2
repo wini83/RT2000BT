@@ -14,13 +14,15 @@ BATTERY_ID = "01051304-4700-e9e4-8939-164230d1df67"
 
 BATTERY_ID_ALt = "47e9ee2c-47e9-11e4-8939-164230d1df67"
 
-PIN_ID = "47e9ee30-47e9-11e4-8939-164230d1df67"
+PIN_ID: str = "47e9ee30-47e9-11e4-8939-164230d1df67"
 
 try:
     adapter.start()
     device = adapter.connect('9E:5F:48:89:87:D5')
     pin = [0, 0, 0, 0]
     pin_array = bytearray(pin)
+
+    print(device.discover_characteristics())
 
     handle = device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
     print(handle)
