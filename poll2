@@ -22,7 +22,7 @@ try:
     pin = [0, 0, 0, 0]
     pin_array = bytearray(pin)
 
-    handle = device.char_write(PIN_ID, pin_array)
+    handle = device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
     print(handle)
 
     value = device.char_read(SETTINGS_ID)
