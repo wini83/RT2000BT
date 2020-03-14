@@ -27,11 +27,10 @@ try:
     handle = device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
     print(handle)
 
-    value = device.char_read(SETTINGS_ID)
-    value_list = list(value)
-    print(value_list)
+    settings = list(device.char_read(SETTINGS_ID))
+    print(settings)
 
-    value2 = device.char_read(BATTERY_ID_ALt)
-    print(value2)
+    battery = list(device.char_read(BATTERY_ID_ALt))
+    print(battery)
 finally:
     adapter.stop()
