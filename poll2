@@ -27,5 +27,8 @@ try:
 
     value = device.char_read(SETTINGS_ID)
     print(value)
+
+    value2 = device.char_read(BATTERY_ID_ALt)
+    print(value2)
 finally:
     adapter.stop()
