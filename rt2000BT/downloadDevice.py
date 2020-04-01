@@ -32,7 +32,7 @@ class downloadDevice(gatt.Device):
     setpoint_temp = 0
     mode_auto = -1
     desired_temp = 0
-    desired_mode = False;
+    desired_mode = False
     is_polling_succesful = False
     modus = Modus.unknown
 
