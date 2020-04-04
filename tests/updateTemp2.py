@@ -1,5 +1,4 @@
 import rt2000BT
-import DomoticzAPI as dom
 
 import config
 
