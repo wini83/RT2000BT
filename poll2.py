@@ -22,8 +22,7 @@ try:
 
     #print(device.discover_characteristics())
 
-    handle = device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
-    print(handle)
+    device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
 
     settings = list(device.char_read(SETTINGS_ID))
     print(settings)
