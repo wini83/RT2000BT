@@ -55,9 +55,8 @@ class Valve:
             device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
             current_mode = list(device.char_read(STATUS_ID))[0]
             payload = int(value == True)
-            print("{} {}".format(current_mode, payload))
             if payload != current_mode:
-                print("different")
+                print("Update is possible")
                 if (value):
                     print("Trying to set manual..")
                     device.char_write(STATUS_ID, bytearray(b'\x01'))
@@ -67,4 +66,22 @@ class Valve:
             result = True
         finally:
             self.adapter.stop()
-        return result
+        return
+
+    def update_temperature(self,value):
+        try:
+            result = False
+            self.adapter.start()
+            device = self.adapter.connect(self.mac)
+            device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
+            settings = list(device.char_read(SETTINGS_ID))
+            current_setpoint = settings[1] / 2
+            print("current:{} payload{}".format(current_setpoint, value))
+            if current_setpoint != value:
+                print("Update is possible")
+                settings[1] = value*2
+                print(settings)
+            result = True
+        finally:
+            self.adapter.stop()
+        return
