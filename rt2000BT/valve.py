@@ -15,6 +15,8 @@ PIN_ID = "47e9ee30-47e9-11e4-8939-164230d1df67"
 
 class Valve:
 
+    is_polling_successful: bool
+
     def __init__(self, mac, pin):
         self.adapter = pygatt.GATTToolBackend()
         self._is_settings_acquired = False

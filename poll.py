@@ -9,13 +9,13 @@ valve = rt2000BT.Valve("9E:5F:48:89:87:D5", None)
 valve.poll()
 
 print("-------------------------------------------------")
-if valve.is_polling_succesful:
+if valve.is_polling_successful:
     print("Battery = " + str(valve.battery))
     server = dom.Server(address=config.domoticz_ip, port=config.domoticz_port)
-    dev_act = dom.Device(server,config.temp_current_idx)
-    dev_set = dom.Device(server,config.setpoint_idx)
-    dev_mode =  dom.Device(server,config.manual_idx)
-    print("Current Temp: domoticz={}C; valve ={}C".format(dev_act.temp,valve.current_temp))
+    dev_act = dom.Device(server, config.temp_current_idx)
+    dev_set = dom.Device(server, config.setpoint_idx)
+    dev_mode =  dom.Device(server, config.manual_idx)
+    print("Current Temp: domoticz={}C; valve ={}C".format(dev_act.temp, valve.current_temp))
     if valve.current_temp != dev_act.temp:
         print("Updating Current Temp in domoticz...")
         dev_act.update(0, "{}&battery={}".format(valve.current_temp, valve.battery))
