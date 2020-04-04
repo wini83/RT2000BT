@@ -81,6 +81,7 @@ class Valve:
                 print("Update is possible")
                 settings[1] = value*2
                 print(settings)
+                device.char_write(SETTINGS_ID,bytearray(settings))
             result = True
         finally:
             self.adapter.stop()
