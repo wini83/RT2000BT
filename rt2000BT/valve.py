@@ -14,7 +14,6 @@ PIN_ID = "47e9ee30-47e9-11e4-8939-164230d1df67"
 
 
 class Valve:
-
     is_polling_successful: bool
 
     def __init__(self, mac, pin):
@@ -47,3 +46,25 @@ class Valve:
             self.adapter.stop()
         return result
 
+    # value true = manual; false = auto
+    def update_mode(self, value):
+        try:
+            result = False
+            self.adapter.start()
+            device = self.adapter.connect(self.mac)
+            device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
+            current_mode = list(device.char_read(STATUS_ID))[0]
+            payload = int(value == True)
+            print("{} {}".format(current_mode, payload))
+            if payload != current_mode:
+                print("different")
+                if (value):
+                    print("Trying to set manual..")
+                    device.char_write(STATUS_ID, bytearray(b'\x01'))
+                else:
+                    print("Trying to set auto..")
+                    device.char_write(STATUS_ID, bytearray(b'\x00'))
+            result = True
+        finally:
+            self.adapter.stop()
+        return result

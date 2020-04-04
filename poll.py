@@ -3,7 +3,7 @@ import DomoticzAPI as dom
 
 import config
 
-valve = rt2000BT.Valve("9E:5F:48:89:87:D5", None)
+valve = rt2000BT.Valve(config.mac, None)
 
 is_polling_ok = valve.poll()
 
