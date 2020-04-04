@@ -48,8 +48,8 @@ class Valve:
 
     # value true = manual; false = auto
     def update_mode(self, value):
+        result = False
         try:
-            result = False
             self.adapter.start()
             device = self.adapter.connect(self.mac)
             device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
@@ -66,7 +66,7 @@ class Valve:
             result = True
         finally:
             self.adapter.stop()
-        return
+        return result
 
     def update_temperature(self, value):
         try:
