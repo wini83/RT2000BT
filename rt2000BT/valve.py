@@ -31,8 +31,8 @@ class Valve:
         self.is_polling_successful = False
 
     def poll(self):
+        result = False
         try:
-            result = False
             self.adapter.start()
             device = self.adapter.connect(self.mac)
             device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
