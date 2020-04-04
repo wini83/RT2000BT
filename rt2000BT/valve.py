@@ -41,7 +41,7 @@ class Valve:
             self.current_temp = settings[0] / 2
             self.set_point_temp = settings[1] / 2
             self.battery = list(device.char_read(BATTERY_ID_ALt))[0]
-            #self.mode_auto =
+            self.mode_auto = list(device.char_read(STATUS_ID))[0]
             result = True
         finally:
             self.adapter.stop()
