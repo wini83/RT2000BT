@@ -36,5 +36,7 @@ try:
     battery = list(device.char_read(BATTERY_ID_ALt))[0]
     print("Battery: domoticz=N/A C; valve ={}%".format(battery))
 
+    status = list(device.char_read(STATUS_ID))
+    print (status)
 finally:
     adapter.stop()

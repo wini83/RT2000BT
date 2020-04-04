@@ -33,6 +33,7 @@ class Valve:
 
     def poll(self):
         try:
+            result = False
             self.adapter.start()
             device = self.adapter.connect(self.mac)
             device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
@@ -40,6 +41,9 @@ class Valve:
             self.current_temp = settings[0] / 2
             self.set_point_temp = settings[1] / 2
             self.battery = list(device.char_read(BATTERY_ID_ALt))[0]
-            self.is_polling_successful = True
+            #self.mode_auto =
+            result = True
         finally:
             self.adapter.stop()
+        return result
+

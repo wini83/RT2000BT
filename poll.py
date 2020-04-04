@@ -5,10 +5,10 @@ import config
 
 valve = rt2000BT.Valve("9E:5F:48:89:87:D5", None)
 
-valve.poll()
+is_polling_ok = valve.poll()
 
 print("-------------------------------------------------")
-if valve.is_polling_successful:
+if is_polling_ok:
     print("Battery = " + str(valve.battery))
     server = dom.Server(address=config.domoticz_ip, port=config.domoticz_port)
     dev_act = dom.Device(server, config.temp_current_idx)
