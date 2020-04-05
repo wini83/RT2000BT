@@ -53,7 +53,7 @@ class Valve:
             payload = int(value == True)
             if payload != current_mode:
                 print("Update is possible")
-                if (value):
+                if value:
                     print("Trying to set manual..")
                     device.char_write(STATUS_ID, bytearray(b'\x01'))
                 else:
@@ -80,7 +80,7 @@ class Valve:
                 settings[1] = value * 2
                 print(settings)
                 device.char_write(SETTINGS_ID, bytearray(settings))
-            result = True
+            result: bool = True
         except Exception as e:
             print(e)
         finally:
