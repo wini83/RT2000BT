@@ -18,17 +18,12 @@ class Valve:
 
     def __init__(self, mac, pin):
         self.adapter = pygatt.GATTToolBackend()
-        self._is_settings_acquired = False
-        self._is_status_acquired = False
-        self._is_battery_acquired = False
         self.mac = mac
         self.pin = pin
         self.battery = 255
         self.current_temp = 0
         self.set_point_temp = 0
         self.mode_auto = -1
-        self.desired_temp = 0
-        self.is_polling_successful = False
 
     def poll(self):
         result = False
@@ -86,6 +81,8 @@ class Valve:
                 print(settings)
                 device.char_write(SETTINGS_ID, bytearray(settings))
             result = True
+        except Exception as e:
+            print(e)
         finally:
             self.adapter.stop()
         return result
