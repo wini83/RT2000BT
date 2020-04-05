@@ -42,13 +42,14 @@ class Valve:
             self.battery = list(device.char_read(BATTERY_ID_ALt))[0]
             self.mode_auto = list(device.char_read(STATUS_ID))[0]
             result = True
+        except Exception as e:
+            print(e)
         finally:
             self.adapter.stop()
         return result
 
     # value true = manual; false = auto
     def update_mode(self, value):
-        result = False
         try:
             self.adapter.start()
             device = self.adapter.connect(self.mac)
@@ -63,14 +64,15 @@ class Valve:
                 else:
                     print("Trying to set auto..")
                     device.char_write(STATUS_ID, bytearray(b'\x00'))
-            result = True
+            result: bool = True
+        except Exception as e:
+            print(e)
         finally:
             self.adapter.stop()
         return result
 
     def update_temperature(self, value):
         try:
-            result = False
             self.adapter.start()
             device = self.adapter.connect(self.mac)
             device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
@@ -80,10 +82,10 @@ class Valve:
             print("current:{} payload{}".format(current_setpoint, value))
             if current_setpoint != value:
                 print("Update is possible")
-                settings[1] = value*2
+                settings[1] = value * 2
                 print(settings)
                 device.char_write(SETTINGS_ID, bytearray(settings))
             result = True
         finally:
             self.adapter.stop()
-        return
+        return result

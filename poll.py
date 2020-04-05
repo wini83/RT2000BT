@@ -7,6 +7,8 @@ valve = rt2000BT.Valve(config.mac, None)
 
 is_polling_ok = valve.poll()
 
+print(is_polling_ok)
+
 print("-------------------------------------------------")
 if is_polling_ok:
     print("Battery = " + str(valve.battery))
