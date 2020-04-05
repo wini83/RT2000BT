@@ -7,7 +7,7 @@ import rt2000BT
 
 print("---------Connect to DOMOTICZ---------------------")
 server = dom.Server(address=config.domoticz_ip, port=config.domoticz_port)
-dom_dev_setpoint = dom.Device(server, config.setpoint_idx)
+dom_dev_setpoint = dom.Device(server, config.thermostat_idx)
 print("Setpoint in Domoticz: {}°C".format(dom_dev_setpoint.temp))
 
 print("---------Connect to Valve-------------------------")
