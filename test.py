@@ -1,4 +1,4 @@
-import Worker
+from worker import Worker
 
 worker = Worker()
 
