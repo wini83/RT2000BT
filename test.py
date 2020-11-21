@@ -1,5 +1,5 @@
 from worker import Worker
 
-worker = Worker()
+worker1 = Worker()
 
-worker.run()
+worker1.run()
