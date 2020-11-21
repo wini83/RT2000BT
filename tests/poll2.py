@@ -1,7 +1,5 @@
 import pygatt
 
-# The BGAPI backend will attempt to auto-discover the serial device name of the
-# attached BGAPI-compatible USB adapter.
 adapter = pygatt.GATTToolBackend()
 
 SERVICE_ID = "47e9ee00-47e9-11e4-8939-164230d1df67"
@@ -24,8 +22,7 @@ try:
 
     #print(device.discover_characteristics())
 
-    handle = device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
-    print(handle)
+    device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
 
     settings = list(device.char_read(SETTINGS_ID))
     print(settings)
@@ -39,6 +36,7 @@ try:
     battery = list(device.char_read(BATTERY_ID_ALt))[0]
     print("Battery: domoticz=N/A C; valve ={}%".format(battery))
 
-    print(device.get_rssi())
+    status = list(device.char_read(STATUS_ID))[0]
+    print (status)
 finally:
     adapter.stop()
