@@ -79,7 +79,7 @@ class Valve:
             print("current:{} payload{}".format(current_setpoint, value))
             if current_setpoint != value:
                 print("Update is possible")
-                settings[1] = value * 2
+                settings[1] = int(value * 2)
                 print(settings)
                 device.char_write(SETTINGS_ID, bytearray(settings))
             result = True
