@@ -22,6 +22,8 @@ def on_message(client, userdata, msg):
     if idx == config.thermostat_idx:
         new__temp = float(data["svalue1"])
         print("New value: {}C".format(new__temp))
+        print("Valve last: {}C".format(valve.set_point_temp))
+        valve.update_temperature(new__temp)
 
 
 valve = rt2000BT.Valve(config.mac, None)
