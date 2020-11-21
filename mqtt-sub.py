@@ -39,5 +39,8 @@ client.loop_start()
 
 
 while True:
-    time.sleep(10)
-    print("loop")
+    time.sleep(600)
+    print(time.ctime())
+    client.loop_stop()
+    poller.poll_valve(valve)
+    client.loop_start()
