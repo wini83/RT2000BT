@@ -1,11 +1,8 @@
-import socket
 import paho.mqtt.client as mqtt
 import json
 import rt2000BT
 import time
-import config
-import poller
-
+from rt2000BT import poller
 
 import config
 
