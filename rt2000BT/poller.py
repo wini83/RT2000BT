@@ -8,7 +8,6 @@ def poll_valve(valve):
 
     print(is_polling_ok)
 
-    print("-------------------------------------------------")
     if is_polling_ok:
         print("Battery = " + str(valve.battery))
         server = dom.Server(address=config.domoticz_ip, port=config.domoticz_port)

@@ -3,6 +3,7 @@ import json
 import rt2000BT
 import time
 from rt2000BT import poller
+import logging
 
 import config
 
@@ -12,8 +13,8 @@ class Worker(object):
         self.valve = rt2000BT.Valve(config.mac, None)
 
     def on_connect(self, client, userdata, flags, rc):
-        print("error = " + str(rc))
-
+        logging.info("Successfully connected to MQTT server")
+        logging.info("error = " + str(rc))
         client.subscribe("domoticz/out")
 
     def on_message(self, client, userdata, msg):
@@ -22,8 +23,8 @@ class Worker(object):
         idx = int(data["idx"])
         if idx == config.thermostat_idx:
             new__temp = float(data["svalue1"])
-            print("New value: {}C".format(new__temp))
-            print("Valve last: {}C".format(self.valve.set_point_temp))
+            logging.info("New value: %sC", new__temp)
+            logging.info("Valve last: %sC",self.valve.set_point_temp)
             self.valve.update_temperature(new__temp)
 
     def run(self):
@@ -41,7 +42,7 @@ class Worker(object):
 
         while True:
             time.sleep(600)
-            print(time.ctime())
+            logging.info("New Loop")
             client.loop_stop()
             poller.poll_valve(valve)
             client.loop_start()

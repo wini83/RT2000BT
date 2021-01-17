@@ -1,4 +1,5 @@
 import pygatt
+import logging
 
 SERVICE_ID = "47e9ee00-47e9-11e4-8939-164230d1df67"
 
@@ -53,12 +54,12 @@ class Valve:
             current_mode = list(device.char_read(STATUS_ID))[0]
             payload = int(value == True)
             if payload != current_mode:
-                print("Update is possible")
+                logging.info("Update is possible")
                 if value:
-                    print("Trying to set manual..")
+                    logging.info("Trying to set manual..")
                     device.char_write(STATUS_ID, bytearray(b'\x01'))
                 else:
-                    print("Trying to set auto..")
+                    logging.info("Trying to set auto..")
                     device.char_write(STATUS_ID, bytearray(b'\x00'))
             result = True
         except Exception as e:
@@ -74,13 +75,13 @@ class Valve:
             device = self.adapter.connect(self.mac)
             device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
             settings = list(device.char_read(SETTINGS_ID))
-            print(settings)
+            logging.info(settings)
             current_setpoint = settings[1] / 2
-            print("current:{} payload{}".format(current_setpoint, value))
+            logging.info("current:{} payload{}".format(current_setpoint, value))
             if current_setpoint != value:
-                print("Update is possible")
+                logging.info("Update is possible")
                 settings[1] = int(value * 2)
-                print(settings)
+                logging.info(settings)
                 device.char_write(SETTINGS_ID, bytearray(settings))
             result = True
         except Exception as e:
