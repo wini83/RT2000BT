@@ -1,15 +1,18 @@
 # noinspection PyPep8Naming
 import DomoticzAPI as dom
 import config
+import paho.mqtt.client as mqtt
+import logging
 
 
-def poll_valve(valve, client):
+def poll_valve(valve, client: mqtt.Client):
     is_polling_ok = valve.poll()
 
     print(is_polling_ok)
 
     if is_polling_ok:
-        print("Battery = " + str(valve.battery))
+        logging.info("Battery = %s", valve.battery)
+        client.publish("{}/State".format(config.mqtt_topic), payload=valve.battery, qos=0, retain=False)
         server = dom.Server(address=config.domoticz_ip, port=config.domoticz_port)
         dev_act = dom.Device(server, config.temp_current_idx)
         dev_set = dom.Device(server, config.setpoint_idx)
