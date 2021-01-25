@@ -9,6 +9,6 @@ logging.basicConfig(handlers=handlers, level=logging.DEBUG)
 
 logging.info("Start")
 
-#worker1 = Worker()
+worker1 = Worker()
 
-#worker1.run()
+worker1.run()
