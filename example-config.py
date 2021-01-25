@@ -14,3 +14,5 @@ mqtt_server_port = 1883
 mqtt_user = "user"
 
 mqtt_pass = "password"
+
+mqtt_topic = "comet/lv1"

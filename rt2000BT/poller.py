@@ -1,9 +1,9 @@
-import rt2000BT
+# noinspection PyPep8Naming
 import DomoticzAPI as dom
 import config
 
 
-def poll_valve(valve):
+def poll_valve(valve, client):
     is_polling_ok = valve.poll()
 
     print(is_polling_ok)
@@ -20,7 +20,7 @@ def poll_valve(valve):
             dev_act.update(0, valve.current_temp, valve.battery, None)
         print("Setpoint: domoticz={}C; valve ={}C".format(dev_set.temp, valve.set_point_temp))
         if valve.set_point_temp != dev_set.temp:
-            print("Updating Setpoint in domoticz...")
+            print('Updating Setpoint in domoticz...')
             dev_set.update(0, valve.set_point_temp, valve.battery, None)
         if valve.mode_auto == 0:
             if dev_mode.data == "Off":

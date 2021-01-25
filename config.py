@@ -16,3 +16,5 @@ mqtt_user = "wini"
 mqtt_pass = "dupa"
 
 mac = "9E:5F:48:89:87:D5"
+
+mqtt_topic = "comet/lv1"

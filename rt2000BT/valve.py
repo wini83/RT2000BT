@@ -14,6 +14,7 @@ BATTERY_ID_ALt = "47e9ee2c-47e9-11e4-8939-164230d1df67"
 PIN_ID = "47e9ee30-47e9-11e4-8939-164230d1df67"
 
 
+# noinspection PyBroadException
 class Valve:
     is_polling_successful: bool
 
@@ -27,7 +28,6 @@ class Valve:
         self.mode_auto = -1
 
     def poll(self):
-        result = False
         try:
             self.adapter.start()
             device = self.adapter.connect(self.mac)
@@ -38,8 +38,9 @@ class Valve:
             self.battery = list(device.char_read(BATTERY_ID_ALt))[0]
             self.mode_auto = list(device.char_read(STATUS_ID))[0]
             result = True
-        except Exception as e:
-            print(e)
+        except Exception:
+            result = False
+            logging.error("Exception occurred", exc_info=True)
         finally:
             self.adapter.stop()
         return result
@@ -47,12 +48,11 @@ class Valve:
     # value true = manual; false = auto
     def update_mode(self, value):
         try:
-            result = False
             self.adapter.start()
             device = self.adapter.connect(self.mac)
             device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
             current_mode = list(device.char_read(STATUS_ID))[0]
-            payload = int(value == True)
+            payload = int(value)
             if payload != current_mode:
                 logging.info("Update is possible")
                 if value:
@@ -62,15 +62,15 @@ class Valve:
                     logging.info("Trying to set auto..")
                     device.char_write(STATUS_ID, bytearray(b'\x00'))
             result = True
-        except Exception as e:
-            print(e)
+        except Exception:
+            result = False
+            logging.error("Exception occurred", exc_info=True)
         finally:
             self.adapter.stop()
         return result
 
     def update_temperature(self, value):
         try:
-            result = False
             self.adapter.start()
             device = self.adapter.connect(self.mac)
             device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
@@ -83,9 +83,10 @@ class Valve:
                 settings[1] = int(value * 2)
                 logging.info(settings)
                 device.char_write(SETTINGS_ID, bytearray(settings))
-            result = True
-        except Exception as e:
-            print(e)
+            result: bool = True
+        except Exception:
+            result = False
+            logging.error("Exception occurred", exc_info=True)
         finally:
             self.adapter.stop()
         return result
