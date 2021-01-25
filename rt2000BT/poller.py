@@ -2,7 +2,22 @@
 import DomoticzAPI as dom
 import config
 import paho.mqtt.client as mqtt
+import json
 import logging
+
+
+def dom_update_temp(client: mqtt.Client, idx, temp, battery, rrsi=12, qos=0, retain=False):
+    json_payload = {
+        "command": "udevice",
+        "idx": idx,
+        "nvalue": 0,
+        "svalue": str(temp),
+        "Battery": battery,
+        "RSSI": rrsi
+    }
+    json_string = json.dumps(json_payload)
+    print(json_string)
+    client.publish("domoticz/in", payload=json_string, qos=qos, retain=retain)
 
 
 def poll_valve(valve, client: mqtt.Client):
@@ -13,21 +28,20 @@ def poll_valve(valve, client: mqtt.Client):
     if is_polling_ok:
         logging.info("Battery = %s", valve.battery)
         client.publish("{}/Battery".format(config.mqtt_topic), payload=valve.battery, qos=0, retain=False)
+
         server = dom.Server(address=config.domoticz_ip, port=config.domoticz_port)
-        dev_act = dom.Device(server, config.temp_current_idx)
-        dev_set = dom.Device(server, config.setpoint_idx)
         dev_mode = dom.Device(server, config.manual_idx)
-        print("Current Temp: domoticz={}C; valve ={}C".format(dev_act.temp, valve.current_temp))
+
+        logging.info("Current Temp: %s C", valve.current_temp)
         client.publish("{}/Temp-current".format(config.mqtt_topic), payload=valve.current_temp, qos=0, retain=False)
-        if valve.current_temp != dev_act.temp:
-            print("Updating Current Temp in domoticz...")
-            dev_act.update(0, valve.current_temp, valve.battery, None)
-        print("Setpoint: domoticz={}C; valve ={}C".format(dev_set.temp, valve.set_point_temp))
+        dom_update_temp(client, config.temp_current_idx, valve.current_temp, valve.battery)
+
+        logging.info("Setpoint: %s C", valve.set_point_temp)
         client.publish("{}/Temp-setpoint".format(config.mqtt_topic), payload=valve.set_point_temp, qos=0, retain=False)
-        if valve.set_point_temp != dev_set.temp:
-            print('Updating Setpoint in domoticz...')
-            dev_set.update(0, valve.set_point_temp, valve.battery, None)
+        dom_update_temp(client, config.setpoint_idx, valve.set_point_temp, valve.battery)
+
         client.publish("{}/Auto-Mode".format(config.mqtt_topic), payload=valve.mode_auto, qos=0, retain=False)
+        logging.info("Mode-Auto: %s", valve.mode_auto)
         if valve.mode_auto == 0:
             if dev_mode.data == "Off":
                 print("MODE: domoticz=auto; valve=auto")
