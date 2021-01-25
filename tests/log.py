@@ -6,4 +6,4 @@ handlers = [logging.handlers.SysLogHandler(address=('192.168.2.102', 514)),
 
 logging.basicConfig(handlers=handlers, level=logging.DEBUG)
 
-logging.debug("ss")
+logging.info("ss")
