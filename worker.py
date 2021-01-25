@@ -12,11 +12,13 @@ class Worker(object):
     def __init__(self):
         self.valve = rt2000BT.Valve(config.mac, None)
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def on_connect(self, client, userdata, flags, rc):
         logging.info("Successfully connected to MQTT server")
         logging.info("error = " + str(rc))
         client.subscribe("domoticz/out")
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def on_message(self, client, userdata, msg):
         my_json = msg.payload.decode('utf8')
         data = json.loads(my_json)
@@ -24,9 +26,10 @@ class Worker(object):
         if idx == config.thermostat_idx:
             new__temp = float(data["svalue1"])
             logging.info("New value: %sC", new__temp)
-            logging.info("Valve last: %sC",self.valve.set_point_temp)
+            logging.info("Valve last: %sC", self.valve.set_point_temp)
             self.valve.update_temperature(new__temp)
 
+    # noinspection PyTypeChecker
     def run(self):
         valve = rt2000BT.Valve(config.mac, None)
 
