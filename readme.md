@@ -27,6 +27,7 @@ Następnie uzupełnij wartości w `.env`.
 Obsługiwane zmienne:
 
 - `LOG_LEVEL` (`DEBUG`, `INFO`, `WARNING`, `ERROR`; domyślnie `INFO`)
+- `BLE_LIB_LOG_LEVEL` (`DEBUG`, `INFO`, `WARNING`, `ERROR`; domyślnie `WARNING`) - poziom logów `bleak`/`dbus_fast`
 - `MQTT_HOST` (domyślnie `127.0.0.1`)
 - `MQTT_PORT` (domyślnie `1883`)
 - `MQTT_USER`
@@ -65,4 +66,5 @@ Jeśli chcesz widzieć surowe odczyty GATT i wartości po parsowaniu, ustaw w `.
 
 ```bash
 LOG_LEVEL=DEBUG
+BLE_LIB_LOG_LEVEL=WARNING
 ```

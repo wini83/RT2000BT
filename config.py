@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+ble_lib_log_level = os.getenv("BLE_LIB_LOG_LEVEL", "WARNING").upper()
 
 mqtt_server_ip = os.getenv("MQTT_HOST", "127.0.0.1")
 mqtt_server_port = int(os.getenv("MQTT_PORT", "1883"))
