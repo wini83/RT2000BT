@@ -16,7 +16,15 @@ uv sync
 
 ## Konfiguracja
 
-Ustaw przez zmienne środowiskowe:
+Najprościej przez plik `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Następnie uzupełnij wartości w `.env`.
+
+Obsługiwane zmienne:
 
 - `MQTT_HOST` (domyślnie `127.0.0.1`)
 - `MQTT_PORT` (domyślnie `1883`)

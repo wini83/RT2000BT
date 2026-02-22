@@ -1,5 +1,7 @@
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 mqtt_server_ip = os.getenv("MQTT_HOST", "127.0.0.1")
 mqtt_server_port = int(os.getenv("MQTT_PORT", "1883"))
