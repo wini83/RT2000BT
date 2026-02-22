@@ -22,6 +22,14 @@ class Valve:
         await client.connect()
         return client
 
+    async def _safe_disconnect(self, client: BleakClient | None) -> None:
+        if not client:
+            return
+        try:
+            await client.disconnect()
+        except Exception:
+            logging.warning("BLE disconnect failed; continuing", exc_info=True)
+
     async def poll(self) -> bool:
         client = None
         try:
@@ -37,8 +45,7 @@ class Valve:
             logging.exception("BLE poll failed")
             return False
         finally:
-            if client and client.is_connected:
-                await client.disconnect()
+            await self._safe_disconnect(client)
 
     # True = manual, False = auto
     async def update_mode(self, value: bool) -> bool:
@@ -55,8 +62,7 @@ class Valve:
             logging.exception("BLE mode update failed")
             return False
         finally:
-            if client and client.is_connected:
-                await client.disconnect()
+            await self._safe_disconnect(client)
 
     async def update_temperature(self, value: float) -> bool:
         client = None
@@ -73,5 +79,4 @@ class Valve:
             logging.exception("BLE temperature update failed")
             return False
         finally:
-            if client and client.is_connected:
-                await client.disconnect()
+            await self._safe_disconnect(client)

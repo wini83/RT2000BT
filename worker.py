@@ -16,6 +16,17 @@ class Worker:
     def _publish_state(self, client: mqtt.Client, payload: str) -> None:
         client.publish(f"{config.mqtt_topic}/state", payload=payload, retain=True)
 
+    def _schedule(self, coro) -> None:
+        future = asyncio.run_coroutine_threadsafe(coro, self.loop)
+
+        def _log_result(done):
+            try:
+                done.result()
+            except Exception:
+                logging.exception("Async task failed")
+
+        future.add_done_callback(_log_result)
+
     async def _poll_and_publish(self, client: mqtt.Client) -> None:
         async with self.ble_lock:
             if await self.valve.poll():
@@ -58,14 +69,12 @@ class Worker:
         logging.info("Connected to MQTT (%s)", reason_code)
         self._publish_state(client, "Online")
         client.subscribe(f"{config.mqtt_topic}/cmd/#")
-        asyncio.run_coroutine_threadsafe(self._poll_and_publish(client), self.loop)
+        self._schedule(self._poll_and_publish(client))
 
     def on_message(self, client, userdata, msg):
         payload = msg.payload.decode("utf-8", errors="ignore")
         logging.info("MQTT command topic=%s payload=%s", msg.topic, payload)
-        asyncio.run_coroutine_threadsafe(
-            self._handle_command(client, msg.topic, payload), self.loop
-        )
+        self._schedule(self._handle_command(client, msg.topic, payload))
 
     def on_disconnect(self, client, userdata, disconnect_flags, reason_code, properties):
         logging.info("Disconnected from MQTT (%s)", reason_code)
@@ -87,7 +96,10 @@ class Worker:
         try:
             while True:
                 await asyncio.sleep(config.poll_interval_seconds)
-                await self._poll_and_publish(client)
+                try:
+                    await self._poll_and_publish(client)
+                except Exception:
+                    logging.exception("Polling loop failed; continuing")
         finally:
             self._publish_state(client, "Offline")
             client.loop_stop()
