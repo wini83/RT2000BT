@@ -64,6 +64,9 @@ class Valve:
                 self.mode_auto,
             )
             return True
+        except TimeoutError:
+            logger.warning("BLE poll timeout for mac=%s", self.mac)
+            return False
         except Exception:
             logger.exception("BLE poll failed")
             return False
@@ -89,6 +92,9 @@ class Valve:
                 await client.write_gatt_char(STATUS_ID, bytes([payload]))
                 logger.debug("BLE mode write raw=%s", bytes([payload]).hex())
             return True
+        except TimeoutError:
+            logger.warning("BLE mode update timeout for mac=%s", self.mac)
+            return False
         except Exception:
             logger.exception("BLE mode update failed")
             return False
@@ -115,6 +121,9 @@ class Valve:
                 await client.write_gatt_char(SETTINGS_ID, payload)
                 logger.debug("BLE setpoint write raw=%s", payload.hex())
             return True
+        except TimeoutError:
+            logger.warning("BLE temperature update timeout for mac=%s", self.mac)
+            return False
         except Exception:
             logger.exception("BLE temperature update failed")
             return False
