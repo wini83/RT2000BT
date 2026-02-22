@@ -1,12 +1,12 @@
 [Unit]
-Description=RT2000BT BLE->MQTT bridge
+Description=RT2000BT BLE->MQTT bridge (%i)
 After=network-online.target bluetooth.service
 Wants=network-online.target bluetooth.service
 
 [Service]
 Type=simple
-User=mario
-Group=mario
+User=%i
+Group=%i
 WorkingDirectory=/opt/rt2000bt
 EnvironmentFile=/opt/rt2000bt/.env
 ExecStart=/opt/rt2000bt/.venv/bin/python /opt/rt2000bt/comet.py

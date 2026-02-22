@@ -43,6 +43,39 @@ Obsługiwane zmienne:
 uv run python comet.py
 ```
 
+## Systemd (RPi)
+
+Masz dwa warianty:
+
+1. Konkretny user/path: `comet.service`
+2. User-neutral (template): `comet@.service`
+
+W `comet.service` ustaw `User=` i `Group=` pod swój system.
+
+### Deploy do /opt/rt2000bt
+
+```bash
+sudo mkdir -p /opt/rt2000bt
+sudo rsync -a --delete ./ /opt/rt2000bt/
+sudo chown -R $(whoami):$(whoami) /opt/rt2000bt
+cd /opt/rt2000bt
+uv sync
+```
+
+### Wariant user-neutral (rekomendowany)
+
+```bash
+sudo cp comet@.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now comet@$(whoami).service
+```
+
+Podgląd logów:
+
+```bash
+journalctl -u comet@$(whoami).service -f
+```
+
 ## MQTT: telemetry
 
 Publikowane topici:

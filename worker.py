@@ -10,13 +10,16 @@ from rt2000BT import Valve, poll_valve
 class Worker:
     def __init__(self):
         self.valve = Valve(config.mac, None, timeout=config.ble_timeout_seconds)
-        self.loop = None
+        self.loop: asyncio.AbstractEventLoop | None = None
         self.ble_lock = asyncio.Lock()
 
     def _publish_state(self, client: mqtt.Client, payload: str) -> None:
         client.publish(f"{config.mqtt_topic}/state", payload=payload, retain=True)
 
     def _schedule(self, coro) -> None:
+        if self.loop is None:
+            logging.warning("Event loop is not ready; dropping scheduled task")
+            return
         future = asyncio.run_coroutine_threadsafe(coro, self.loop)
 
         def _log_result(done):
@@ -65,8 +68,8 @@ class Worker:
                     if await self.valve.poll():
                         poll_valve(self.valve, client)
 
-    def on_connect(self, client, userdata, flags, reason_code, properties):
-        logging.info("Connected to MQTT (%s)", reason_code)
+    def on_connect(self, client, userdata, flags, rc):
+        logging.info("Connected to MQTT (%s)", rc)
         self._publish_state(client, "Online")
         client.subscribe(f"{config.mqtt_topic}/cmd/#")
         self._schedule(self._poll_and_publish(client))
@@ -76,13 +79,13 @@ class Worker:
         logging.info("MQTT command topic=%s payload=%s", msg.topic, payload)
         self._schedule(self._handle_command(client, msg.topic, payload))
 
-    def on_disconnect(self, client, userdata, disconnect_flags, reason_code, properties):
-        logging.info("Disconnected from MQTT (%s)", reason_code)
+    def on_disconnect(self, client, userdata, rc):
+        logging.info("Disconnected from MQTT (%s)", rc)
 
     async def run(self):
         self.loop = asyncio.get_running_loop()
 
-        client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+        client = mqtt.Client()
         client.on_connect = self.on_connect
         client.on_message = self.on_message
         client.on_disconnect = self.on_disconnect
