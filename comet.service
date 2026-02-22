@@ -1,0 +1,14 @@
+[Unit]
+Description=Comet Blue
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/RT2000BT/comet.py
+WorkingDirectory=/opt/RT2000BT/
+Environment=API_KEY=123456789
+Environment=API_PASS=password
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=sysinit.target
