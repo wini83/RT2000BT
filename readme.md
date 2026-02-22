@@ -26,6 +26,7 @@ Następnie uzupełnij wartości w `.env`.
 
 Obsługiwane zmienne:
 
+- `LOG_LEVEL` (`DEBUG`, `INFO`, `WARNING`, `ERROR`; domyślnie `INFO`)
 - `MQTT_HOST` (domyślnie `127.0.0.1`)
 - `MQTT_PORT` (domyślnie `1883`)
 - `MQTT_USER`
@@ -57,3 +58,11 @@ Publikowane topici:
 - `{MQTT_TOPIC}/cmd/poll` (payload dowolny)
 - `{MQTT_TOPIC}/cmd/setpoint` (payload np. `21.5`)
 - `{MQTT_TOPIC}/cmd/mode` (payload: `auto` / `manual`)
+
+## Debug BLE
+
+Jeśli chcesz widzieć surowe odczyty GATT i wartości po parsowaniu, ustaw w `.env`:
+
+```bash
+LOG_LEVEL=DEBUG
+```
