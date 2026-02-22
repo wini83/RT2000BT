@@ -1,16 +1,20 @@
-from worker import Worker
-import logging.handlers
+import asyncio
+import logging
 import sys
 
-handlers = [logging.handlers.SysLogHandler(address=('192.168.2.102', 514)),
-            logging.handlers.logging.StreamHandler(sys.stdout)]
+from worker import Worker
 
-# noinspection PyArgumentList
-logging.basicConfig(handlers=handlers, level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[logging.StreamHandler(sys.stdout)],
+    format="%(asctime)s %(levelname)s %(message)s",
+)
 
-logging.info("Start")
 
-worker1 = Worker()
+async def main():
+    worker = Worker()
+    await worker.run()
 
-worker1.run()
 
+if __name__ == "__main__":
+    asyncio.run(main())

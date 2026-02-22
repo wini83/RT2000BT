@@ -1,0 +1,13 @@
+[project]
+name = "rt2000bt"
+version = "0.1.0"
+description = "Minimal RT2000BT bridge: BLE <-> MQTT (Node-RED/Home Assistant)"
+readme = "readme.md"
+requires-python = ">=3.11"
+dependencies = [
+  "bleak>=2.1.1",
+  "paho-mqtt>=2.1.0",
+]
+
+[tool.uv]
+package = false

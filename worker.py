@@ -1,54 +1,94 @@
-import paho.mqtt.client as mqtt
-import json
-import rt2000BT
-import time
-from rt2000BT import poller
+import asyncio
 import logging
 
+import paho.mqtt.client as mqtt
+
 import config
+from rt2000BT import Valve, poll_valve
 
 
-class Worker(object):
+class Worker:
     def __init__(self):
-        self.valve = rt2000BT.Valve(config.mac, None)
+        self.valve = Valve(config.mac, None, timeout=config.ble_timeout_seconds)
+        self.loop = None
+        self.ble_lock = asyncio.Lock()
 
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def on_connect(self, client, userdata, flags, rc):
-        logging.info("Successfully connected to MQTT server")
-        client.publish("{}/State".format(config.mqtt_topic), payload="Online", retain=True)
-        logging.info("error = " + str(rc))
-        poller.poll_valve(self.valve, client)
-        client.subscribe("domoticz/out")
+    def _publish_state(self, client: mqtt.Client, payload: str) -> None:
+        client.publish(f"{config.mqtt_topic}/state", payload=payload, retain=True)
 
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
+    async def _poll_and_publish(self, client: mqtt.Client) -> None:
+        async with self.ble_lock:
+            if await self.valve.poll():
+                poll_valve(self.valve, client)
+
+    async def _handle_command(self, client: mqtt.Client, topic: str, payload: str) -> None:
+        payload = payload.strip().lower()
+
+        if topic == f"{config.mqtt_topic}/cmd/poll":
+            await self._poll_and_publish(client)
+            return
+
+        if topic == f"{config.mqtt_topic}/cmd/setpoint":
+            try:
+                value = float(payload)
+            except ValueError:
+                logging.warning("Invalid setpoint payload: %s", payload)
+                return
+            async with self.ble_lock:
+                if await self.valve.update_temperature(value):
+                    if await self.valve.poll():
+                        poll_valve(self.valve, client)
+            return
+
+        if topic == f"{config.mqtt_topic}/cmd/mode":
+            desired = None
+            if payload in {"manual", "1", "true", "on"}:
+                desired = True
+            if payload in {"auto", "0", "false", "off"}:
+                desired = False
+            if desired is None:
+                logging.warning("Invalid mode payload: %s", payload)
+                return
+            async with self.ble_lock:
+                if await self.valve.update_mode(desired):
+                    if await self.valve.poll():
+                        poll_valve(self.valve, client)
+
+    def on_connect(self, client, userdata, flags, reason_code, properties):
+        logging.info("Connected to MQTT (%s)", reason_code)
+        self._publish_state(client, "Online")
+        client.subscribe(f"{config.mqtt_topic}/cmd/#")
+        asyncio.run_coroutine_threadsafe(self._poll_and_publish(client), self.loop)
+
     def on_message(self, client, userdata, msg):
-        my_json = msg.payload.decode('utf8')
-        data = json.loads(my_json)
-        idx = int(data["idx"])
-        if idx == config.thermostat_idx:
-            new__temp = float(data["svalue1"])
-            logging.info("New value: %sC", new__temp)
-            logging.info("Valve last: %sC", self.valve.set_point_temp)
-            self.valve.update_temperature(new__temp)
+        payload = msg.payload.decode("utf-8", errors="ignore")
+        logging.info("MQTT command topic=%s payload=%s", msg.topic, payload)
+        asyncio.run_coroutine_threadsafe(
+            self._handle_command(client, msg.topic, payload), self.loop
+        )
 
-    def on_disconnect(self, client, userdata, rc):
-        client.publish("{}/State".format(config.mqtt_topic), payload="Offline", retain=True)
-        logging.info("Disconnected from MQTT client")
+    def on_disconnect(self, client, userdata, disconnect_flags, reason_code, properties):
+        logging.info("Disconnected from MQTT (%s)", reason_code)
 
-    # noinspection PyTypeChecker
-    def run(self):
-        client = mqtt.Client()
+    async def run(self):
+        self.loop = asyncio.get_running_loop()
+
+        client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
         client.on_connect = self.on_connect
         client.on_message = self.on_message
         client.on_disconnect = self.on_disconnect
-        client.username_pw_set(config.mqtt_user, password=config.mqtt_pass)
-        client.will_set("{}/State".format(config.mqtt_topic), payload="Offline", retain=True)
+        if config.mqtt_user:
+            client.username_pw_set(config.mqtt_user, password=config.mqtt_pass)
+
+        client.will_set(f"{config.mqtt_topic}/state", payload="Offline", retain=True)
         client.connect(config.mqtt_server_ip, config.mqtt_server_port, 60)
         client.loop_start()
 
-        while True:
-            time.sleep(600)
-            logging.info("New Loop")
+        try:
+            while True:
+                await asyncio.sleep(config.poll_interval_seconds)
+                await self._poll_and_publish(client)
+        finally:
+            self._publish_state(client, "Offline")
             client.loop_stop()
-            poller.poll_valve(self.valve, client)
-            client.loop_start()
+            client.disconnect()

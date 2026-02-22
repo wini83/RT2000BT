@@ -1,92 +1,77 @@
-import pygatt
 import logging
-
-SERVICE_ID = "47e9ee00-47e9-11e4-8939-164230d1df67"
+from bleak import BleakClient
 
 STATUS_ID = "47e9ee2a-47e9-11e4-8939-164230d1df67"
-
 SETTINGS_ID = "47e9ee2b-47e9-11e4-8939-164230d1df67"
-
-BATTERY_ID = "01051304-4700-e9e4-8939-164230d1df67"
-
-BATTERY_ID_ALt = "47e9ee2c-47e9-11e4-8939-164230d1df67"
-
+BATTERY_ID_ALT = "47e9ee2c-47e9-11e4-8939-164230d1df67"
 PIN_ID = "47e9ee30-47e9-11e4-8939-164230d1df67"
 
 
-# noinspection PyBroadException
 class Valve:
-    is_polling_successful: bool
-
-    def __init__(self, mac, pin):
-        self.adapter = pygatt.GATTToolBackend()
+    def __init__(self, mac: str, pin: str | None = None, timeout: float = 15.0):
         self.mac = mac
         self.pin = pin
+        self.timeout = timeout
         self.battery = 255
-        self.current_temp = 0
-        self.set_point_temp = 0
+        self.current_temp = 0.0
+        self.set_point_temp = 0.0
         self.mode_auto = -1
 
-    def poll(self):
+    async def _connect(self) -> BleakClient:
+        client = BleakClient(self.mac, timeout=self.timeout)
+        await client.connect()
+        return client
+
+    async def poll(self) -> bool:
+        client = None
         try:
-            self.adapter.start()
-            device = self.adapter.connect(self.mac)
-            device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
-            settings = list(device.char_read(SETTINGS_ID))
+            client = await self._connect()
+            await client.write_gatt_char(PIN_ID, b"\x00\x00\x00\x00")
+            settings = list(await client.read_gatt_char(SETTINGS_ID))
             self.current_temp = settings[0] / 2
             self.set_point_temp = settings[1] / 2
-            self.battery = list(device.char_read(BATTERY_ID_ALt))[0]
-            self.mode_auto = list(device.char_read(STATUS_ID))[0]
-            result = True
+            self.battery = list(await client.read_gatt_char(BATTERY_ID_ALT))[0]
+            self.mode_auto = list(await client.read_gatt_char(STATUS_ID))[0]
+            return True
         except Exception:
-            result = False
-            logging.error("Exception occurred", exc_info=True)
+            logging.exception("BLE poll failed")
+            return False
         finally:
-            self.adapter.stop()
-        return result
+            if client and client.is_connected:
+                await client.disconnect()
 
-    # value true = manual; false = auto
-    def update_mode(self, value):
+    # True = manual, False = auto
+    async def update_mode(self, value: bool) -> bool:
+        client = None
         try:
-            self.adapter.start()
-            device = self.adapter.connect(self.mac)
-            device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
-            current_mode = list(device.char_read(STATUS_ID))[0]
+            client = await self._connect()
+            await client.write_gatt_char(PIN_ID, b"\x00\x00\x00\x00")
+            current_mode = list(await client.read_gatt_char(STATUS_ID))[0]
             payload = int(value)
             if payload != current_mode:
-                logging.info("Update is possible")
-                if value:
-                    logging.info("Trying to set manual..")
-                    device.char_write(STATUS_ID, bytearray(b'\x01'))
-                else:
-                    logging.info("Trying to set auto..")
-                    device.char_write(STATUS_ID, bytearray(b'\x00'))
-            result = True
+                await client.write_gatt_char(STATUS_ID, bytes([payload]))
+            return True
         except Exception:
-            result = False
-            logging.error("Exception occurred", exc_info=True)
+            logging.exception("BLE mode update failed")
+            return False
         finally:
-            self.adapter.stop()
-        return result
+            if client and client.is_connected:
+                await client.disconnect()
 
-    def update_temperature(self, value):
+    async def update_temperature(self, value: float) -> bool:
+        client = None
         try:
-            self.adapter.start()
-            device = self.adapter.connect(self.mac)
-            device.char_write(PIN_ID, bytearray(b'\x00\x00\x00\x00'))
-            settings = list(device.char_read(SETTINGS_ID))
-            logging.info(settings)
+            client = await self._connect()
+            await client.write_gatt_char(PIN_ID, b"\x00\x00\x00\x00")
+            settings = list(await client.read_gatt_char(SETTINGS_ID))
             current_setpoint = settings[1] / 2
-            logging.info("current:{} payload{}".format(current_setpoint, value))
             if current_setpoint != value:
-                logging.info("Update is possible")
                 settings[1] = int(value * 2)
-                logging.info(settings)
-                device.char_write(SETTINGS_ID, bytearray(settings))
-            result: bool = True
+                await client.write_gatt_char(SETTINGS_ID, bytes(settings))
+            return True
         except Exception:
-            result = False
-            logging.error("Exception occurred", exc_info=True)
+            logging.exception("BLE temperature update failed")
+            return False
         finally:
-            self.adapter.stop()
-        return result
+            if client and client.is_connected:
+                await client.disconnect()
