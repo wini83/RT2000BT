@@ -11,6 +11,8 @@ from rt2000BT import Valve, poll_valve
 
 class Worker:
     AVAILABILITY_FAILURE_THRESHOLD = 3
+    COMMAND_ATTEMPTS = 3
+    COMMAND_RETRY_DELAY_SECONDS = 2
 
     def __init__(self):
         self.valve = Valve(config.mac, None, timeout=config.ble_timeout_seconds)
@@ -150,6 +152,31 @@ class Worker:
             self._record_poll_failure(client)
             return False
 
+    async def _run_command_with_retry(self, operation, description: str) -> bool:
+        for attempt in range(1, self.COMMAND_ATTEMPTS + 1):
+            if await operation():
+                if attempt > 1:
+                    logging.info("BLE %s succeeded on attempt %s/%s", description, attempt, self.COMMAND_ATTEMPTS)
+                return True
+            if attempt < self.COMMAND_ATTEMPTS:
+                logging.warning(
+                    "BLE %s failed on attempt %s/%s; retrying in %ss",
+                    description,
+                    attempt,
+                    self.COMMAND_ATTEMPTS,
+                    self.COMMAND_RETRY_DELAY_SECONDS,
+                )
+                await asyncio.sleep(self.COMMAND_RETRY_DELAY_SECONDS)
+        logging.error("BLE %s failed after %s attempts", description, self.COMMAND_ATTEMPTS)
+        return False
+
+    async def _confirm_command(self, client: mqtt.Client) -> None:
+        if await self.valve.poll():
+            poll_valve(self.valve, client)
+            self._record_poll_success(client)
+        else:
+            self._record_poll_failure(client)
+
     async def _handle_command(self, client: mqtt.Client, topic: str, payload: str) -> None:
         payload = payload.strip().lower()
 
@@ -164,12 +191,10 @@ class Worker:
                 logging.warning("Invalid setpoint payload: %s", payload)
                 return
             async with self.ble_lock:
-                if await self.valve.update_temperature(value):
-                    if await self.valve.poll():
-                        poll_valve(self.valve, client)
-                        self._record_poll_success(client)
-                    else:
-                        self._record_poll_failure(client)
+                if await self._run_command_with_retry(
+                    lambda: self.valve.update_temperature(value), "temperature update"
+                ):
+                    await self._confirm_command(client)
             return
 
         if topic == f"{config.mqtt_topic}/mode/set":
@@ -182,12 +207,10 @@ class Worker:
                 logging.warning("Invalid mode payload: %s", payload)
                 return
             async with self.ble_lock:
-                if await self.valve.update_mode(desired):
-                    if await self.valve.poll():
-                        poll_valve(self.valve, client)
-                        self._record_poll_success(client)
-                    else:
-                        self._record_poll_failure(client)
+                if await self._run_command_with_retry(
+                    lambda: self.valve.update_mode(desired), "mode update"
+                ):
+                    await self._confirm_command(client)
 
     def on_connect(self, client, userdata, flags, rc):
         logging.info("Connected to MQTT (%s)", rc)
