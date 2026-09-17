@@ -1,5 +1,6 @@
 import logging
 from bleak import BleakClient
+from bleak.exc import BleakBluetoothNotAvailableError
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +68,9 @@ class Valve:
         except TimeoutError:
             logger.warning("BLE poll timeout for mac=%s", self.mac)
             return False
+        except BleakBluetoothNotAvailableError as exc:
+            logger.warning("Bluetooth unavailable for mac=%s: %s", self.mac, exc)
+            return False
         except Exception:
             logger.exception("BLE poll failed")
             return False
@@ -94,6 +98,9 @@ class Valve:
             return True
         except TimeoutError:
             logger.warning("BLE mode update timeout for mac=%s", self.mac)
+            return False
+        except BleakBluetoothNotAvailableError as exc:
+            logger.warning("Bluetooth unavailable for mac=%s: %s", self.mac, exc)
             return False
         except Exception:
             logger.exception("BLE mode update failed")
@@ -123,6 +130,9 @@ class Valve:
             return True
         except TimeoutError:
             logger.warning("BLE temperature update timeout for mac=%s", self.mac)
+            return False
+        except BleakBluetoothNotAvailableError as exc:
+            logger.warning("Bluetooth unavailable for mac=%s: %s", self.mac, exc)
             return False
         except Exception:
             logger.exception("BLE temperature update failed")
