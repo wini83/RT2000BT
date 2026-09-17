@@ -1,5 +1,6 @@
+import asyncio
 import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import config
 from worker import Worker
@@ -141,3 +142,61 @@ def test_home_assistant_birth_republishes_discovery():
 
     discovery_topics = [call.args[0] for call in client.publish.call_args_list]
     assert f"{config.ha_discovery_prefix}/climate/{config.ha_device_id}/config" in discovery_topics
+
+
+def test_command_retry_succeeds_after_transient_failure():
+    worker = make_worker()
+    operation = AsyncMock(side_effect=[False, True])
+
+    with patch("worker.asyncio.sleep", new=AsyncMock()) as sleep:
+        result = asyncio.run(worker._run_command_with_retry(operation, "temperature update"))
+
+    assert result is True
+    assert operation.await_count == 2
+    sleep.assert_awaited_once_with(worker.COMMAND_RETRY_DELAY_SECONDS)
+
+
+def test_command_retry_stops_after_max_attempts():
+    worker = make_worker()
+    operation = AsyncMock(return_value=False)
+
+    with patch("worker.asyncio.sleep", new=AsyncMock()) as sleep:
+        result = asyncio.run(worker._run_command_with_retry(operation, "temperature update"))
+
+    assert result is False
+    assert operation.await_count == worker.COMMAND_ATTEMPTS
+    assert sleep.await_count == worker.COMMAND_ATTEMPTS - 1
+
+
+def test_setpoint_command_retries_then_polls_confirmation():
+    worker = make_worker()
+    client = MagicMock()
+    worker.valve.update_temperature = AsyncMock(side_effect=[False, True])
+    worker.valve.poll = AsyncMock(return_value=True)
+
+    with patch("worker.asyncio.sleep", new=AsyncMock()):
+        asyncio.run(
+            worker._handle_command(
+                client, f"{config.mqtt_topic}/setpoint/set", "22.5"
+            )
+        )
+
+    assert worker.valve.update_temperature.await_count == 2
+    worker.valve.update_temperature.assert_awaited_with(22.5)
+    worker.valve.poll.assert_awaited_once()
+
+
+def test_mode_command_retries_then_polls_confirmation():
+    worker = make_worker()
+    client = MagicMock()
+    worker.valve.update_mode = AsyncMock(side_effect=[False, True])
+    worker.valve.poll = AsyncMock(return_value=True)
+
+    with patch("worker.asyncio.sleep", new=AsyncMock()):
+        asyncio.run(
+            worker._handle_command(client, f"{config.mqtt_topic}/mode/set", "auto")
+        )
+
+    assert worker.valve.update_mode.await_count == 2
+    worker.valve.update_mode.assert_awaited_with(False)
+    worker.valve.poll.assert_awaited_once()
