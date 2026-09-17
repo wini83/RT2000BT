@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 from datetime import datetime, timezone
 
@@ -37,6 +38,62 @@ class Worker:
             qos=0,
             retain=True,
         )
+
+    def _publish_discovery(self, client: mqtt.Client) -> None:
+        device = {
+            "identifiers": [config.ha_device_id],
+            "name": config.ha_device_name,
+            "manufacturer": "Eurotronic",
+            "model": "Comet Blue / RT2000BT",
+        }
+        availability_topic = f"{config.mqtt_topic}/availability"
+
+        climate = {
+            "name": None,
+            "unique_id": f"{config.ha_device_id}_climate",
+            "default_entity_id": f"climate.{config.ha_device_id}",
+            "device": device,
+            "availability_topic": availability_topic,
+            "current_temperature_topic": f"{config.mqtt_topic}/temperature",
+            "temperature_state_topic": f"{config.mqtt_topic}/setpoint",
+            "temperature_command_topic": f"{config.mqtt_topic}/setpoint/set",
+            "mode_state_topic": f"{config.mqtt_topic}/mode",
+            "mode_command_topic": f"{config.mqtt_topic}/mode/set",
+            "modes": ["heat", "auto"],
+            "min_temp": 8,
+            "max_temp": 28,
+            "temp_step": 0.5,
+            "temperature_unit": "C",
+        }
+        battery = {
+            "name": "Battery",
+            "unique_id": f"{config.ha_device_id}_battery",
+            "default_entity_id": f"sensor.{config.ha_device_id}_battery",
+            "device": device,
+            "availability_topic": availability_topic,
+            "state_topic": f"{config.mqtt_topic}/battery",
+            "device_class": "battery",
+            "state_class": "measurement",
+            "unit_of_measurement": "%",
+        }
+        last_seen = {
+            "name": "Last seen",
+            "unique_id": f"{config.ha_device_id}_last_seen",
+            "default_entity_id": f"sensor.{config.ha_device_id}_last_seen",
+            "device": device,
+            "state_topic": f"{config.mqtt_topic}/last_seen",
+            "device_class": "timestamp",
+            "entity_category": "diagnostic",
+        }
+
+        configs = {
+            f"{config.ha_discovery_prefix}/climate/{config.ha_device_id}/config": climate,
+            f"{config.ha_discovery_prefix}/sensor/{config.ha_device_id}_battery/config": battery,
+            f"{config.ha_discovery_prefix}/sensor/{config.ha_device_id}_last_seen/config": last_seen,
+        }
+        for topic, payload in configs.items():
+            client.publish(topic, payload=json.dumps(payload), qos=0, retain=True)
+        logging.info("Published Home Assistant MQTT discovery")
 
     def _record_poll_success(self, client: mqtt.Client) -> None:
         self.consecutive_poll_failures = 0
@@ -96,11 +153,11 @@ class Worker:
     async def _handle_command(self, client: mqtt.Client, topic: str, payload: str) -> None:
         payload = payload.strip().lower()
 
-        if topic == f"{config.mqtt_topic}/cmd/poll":
+        if topic == f"{config.mqtt_topic}/poll/set":
             await self._poll_and_publish(client)
             return
 
-        if topic == f"{config.mqtt_topic}/cmd/setpoint":
+        if topic == f"{config.mqtt_topic}/setpoint/set":
             try:
                 value = float(payload)
             except ValueError:
@@ -115,9 +172,9 @@ class Worker:
                         self._record_poll_failure(client)
             return
 
-        if topic == f"{config.mqtt_topic}/cmd/mode":
+        if topic == f"{config.mqtt_topic}/mode/set":
             desired = None
-            if payload in {"manual", "1", "true", "on"}:
+            if payload in {"heat", "manual", "1", "true", "on"}:
                 desired = True
             if payload in {"auto", "0", "false", "off"}:
                 desired = False
@@ -135,13 +192,19 @@ class Worker:
     def on_connect(self, client, userdata, flags, rc):
         logging.info("Connected to MQTT (%s)", rc)
         self._publish_bridge_state(client, "Online")
-        client.subscribe(f"{config.mqtt_topic}/cmd/#")
+        self._publish_discovery(client)
+        client.subscribe(f"{config.mqtt_topic}/+/set")
+        client.subscribe("homeassistant/status")
         if self.loop is not None:
             self.loop.call_soon_threadsafe(self.mqtt_connected.set)
 
     def on_message(self, client, userdata, msg):
         payload = msg.payload.decode("utf-8", errors="ignore")
         logging.info("MQTT command topic=%s payload=%s", msg.topic, payload)
+        if msg.topic == "homeassistant/status":
+            if payload.strip().lower() == "online":
+                self._publish_discovery(client)
+            return
         self._schedule(self._handle_command(client, msg.topic, payload))
 
     def on_disconnect(self, client, userdata, rc):
