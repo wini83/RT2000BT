@@ -44,12 +44,19 @@ class Worker:
 
     def _record_poll_failure(self, client: mqtt.Client) -> None:
         self.consecutive_poll_failures += 1
-        logging.warning(
-            "Valve poll failed (%s/%s)",
-            self.consecutive_poll_failures,
-            self.AVAILABILITY_FAILURE_THRESHOLD,
-        )
-        if self.consecutive_poll_failures >= self.AVAILABILITY_FAILURE_THRESHOLD:
+        if self.consecutive_poll_failures <= self.AVAILABILITY_FAILURE_THRESHOLD:
+            logging.warning(
+                "Valve poll failed (%s/%s)",
+                self.consecutive_poll_failures,
+                self.AVAILABILITY_FAILURE_THRESHOLD,
+            )
+        else:
+            logging.warning(
+                "Valve poll failed (%s consecutive failures)",
+                self.consecutive_poll_failures,
+            )
+
+        if self.consecutive_poll_failures == self.AVAILABILITY_FAILURE_THRESHOLD:
             self._publish_valve_availability(client, False)
             logging.warning(
                 "Valve unavailable after %s consecutive failed polls",
