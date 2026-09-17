@@ -56,6 +56,11 @@ class Worker:
                 self.consecutive_poll_failures,
             )
 
+    def _next_poll_interval(self) -> int:
+        if 0 < self.consecutive_poll_failures < self.AVAILABILITY_FAILURE_THRESHOLD:
+            return config.retry_interval_seconds
+        return config.poll_interval_seconds
+
     def _schedule(self, coro) -> None:
         if self.loop is None:
             logging.warning("Event loop is not ready; dropping scheduled task")
@@ -149,7 +154,7 @@ class Worker:
 
         try:
             while True:
-                await asyncio.sleep(config.poll_interval_seconds)
+                await asyncio.sleep(self._next_poll_interval())
                 try:
                     await self._poll_and_publish(client)
                 except Exception:
