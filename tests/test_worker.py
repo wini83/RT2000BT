@@ -174,7 +174,10 @@ def test_setpoint_command_retries_then_polls_confirmation():
     worker.valve.update_temperature = AsyncMock(side_effect=[False, True])
     worker.valve.poll = AsyncMock(return_value=True)
 
-    with patch("worker.asyncio.sleep", new=AsyncMock()):
+    with (
+        patch("worker.asyncio.sleep", new=AsyncMock()),
+        patch("worker.poll_valve") as publish_poll,
+    ):
         asyncio.run(
             worker._handle_command(
                 client, f"{config.mqtt_topic}/setpoint/set", "22.5"
@@ -184,6 +187,7 @@ def test_setpoint_command_retries_then_polls_confirmation():
     assert worker.valve.update_temperature.await_count == 2
     worker.valve.update_temperature.assert_awaited_with(22.5)
     worker.valve.poll.assert_awaited_once()
+    publish_poll.assert_called_once_with(worker.valve, client)
 
 
 def test_mode_command_retries_then_polls_confirmation():
@@ -192,7 +196,10 @@ def test_mode_command_retries_then_polls_confirmation():
     worker.valve.update_mode = AsyncMock(side_effect=[False, True])
     worker.valve.poll = AsyncMock(return_value=True)
 
-    with patch("worker.asyncio.sleep", new=AsyncMock()):
+    with (
+        patch("worker.asyncio.sleep", new=AsyncMock()),
+        patch("worker.poll_valve") as publish_poll,
+    ):
         asyncio.run(
             worker._handle_command(client, f"{config.mqtt_topic}/mode/set", "auto")
         )
@@ -200,3 +207,4 @@ def test_mode_command_retries_then_polls_confirmation():
     assert worker.valve.update_mode.await_count == 2
     worker.valve.update_mode.assert_awaited_with(False)
     worker.valve.poll.assert_awaited_once()
+    publish_poll.assert_called_once_with(worker.valve, client)
