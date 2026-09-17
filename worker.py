@@ -16,6 +16,7 @@ class Worker:
         self.loop: asyncio.AbstractEventLoop | None = None
         self.ble_lock = asyncio.Lock()
         self.consecutive_poll_failures = 0
+        self.mqtt_connected = asyncio.Event()
 
     def _publish_bridge_state(self, client: mqtt.Client, payload: str) -> None:
         client.publish(f"{config.mqtt_topic}/state", payload=payload, retain=True)
@@ -135,7 +136,8 @@ class Worker:
         logging.info("Connected to MQTT (%s)", rc)
         self._publish_bridge_state(client, "Online")
         client.subscribe(f"{config.mqtt_topic}/cmd/#")
-        self._schedule(self._poll_and_publish(client))
+        if self.loop is not None:
+            self.loop.call_soon_threadsafe(self.mqtt_connected.set)
 
     def on_message(self, client, userdata, msg):
         payload = msg.payload.decode("utf-8", errors="ignore")
@@ -144,6 +146,8 @@ class Worker:
 
     def on_disconnect(self, client, userdata, rc):
         logging.info("Disconnected from MQTT (%s)", rc)
+        if self.loop is not None:
+            self.loop.call_soon_threadsafe(self.mqtt_connected.clear)
 
     async def run(self):
         self.loop = asyncio.get_running_loop()
@@ -160,12 +164,13 @@ class Worker:
         client.loop_start()
 
         try:
+            await self.mqtt_connected.wait()
             while True:
-                await asyncio.sleep(self._next_poll_interval())
                 try:
                     await self._poll_and_publish(client)
                 except Exception:
                     logging.exception("Polling loop failed; continuing")
+                await asyncio.sleep(self._next_poll_interval())
         finally:
             self._publish_valve_availability(client, False)
             self._publish_bridge_state(client, "Offline")
