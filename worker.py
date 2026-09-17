@@ -9,6 +9,8 @@ from rt2000BT import Valve, poll_valve
 
 
 class Worker:
+    AVAILABILITY_FAILURE_THRESHOLD = 3
+
     def __init__(self):
         self.valve = Valve(config.mac, None, timeout=config.ble_timeout_seconds)
         self.loop: asyncio.AbstractEventLoop | None = None
@@ -35,6 +37,25 @@ class Worker:
             retain=True,
         )
 
+    def _record_poll_success(self, client: mqtt.Client) -> None:
+        self.consecutive_poll_failures = 0
+        self._publish_valve_availability(client, True)
+        self._publish_last_seen(client)
+
+    def _record_poll_failure(self, client: mqtt.Client) -> None:
+        self.consecutive_poll_failures += 1
+        logging.warning(
+            "Valve poll failed (%s/%s)",
+            self.consecutive_poll_failures,
+            self.AVAILABILITY_FAILURE_THRESHOLD,
+        )
+        if self.consecutive_poll_failures >= self.AVAILABILITY_FAILURE_THRESHOLD:
+            self._publish_valve_availability(client, False)
+            logging.warning(
+                "Valve unavailable after %s consecutive failed polls",
+                self.consecutive_poll_failures,
+            )
+
     def _schedule(self, coro) -> None:
         if self.loop is None:
             logging.warning("Event loop is not ready; dropping scheduled task")
@@ -52,18 +73,11 @@ class Worker:
     async def _poll_and_publish(self, client: mqtt.Client) -> bool:
         async with self.ble_lock:
             if await self.valve.poll():
-                self.consecutive_poll_failures = 0
                 poll_valve(self.valve, client)
-                self._publish_valve_availability(client, True)
-                self._publish_last_seen(client)
+                self._record_poll_success(client)
                 return True
 
-            self.consecutive_poll_failures += 1
-            self._publish_valve_availability(client, False)
-            logging.warning(
-                "Valve unavailable after %s consecutive failed poll(s)",
-                self.consecutive_poll_failures,
-            )
+            self._record_poll_failure(client)
             return False
 
     async def _handle_command(self, client: mqtt.Client, topic: str, payload: str) -> None:
@@ -82,12 +96,10 @@ class Worker:
             async with self.ble_lock:
                 if await self.valve.update_temperature(value):
                     if await self.valve.poll():
-                        self.consecutive_poll_failures = 0
                         poll_valve(self.valve, client)
-                        self._publish_valve_availability(client, True)
-                        self._publish_last_seen(client)
+                        self._record_poll_success(client)
                     else:
-                        self._publish_valve_availability(client, False)
+                        self._record_poll_failure(client)
             return
 
         if topic == f"{config.mqtt_topic}/cmd/mode":
@@ -102,12 +114,10 @@ class Worker:
             async with self.ble_lock:
                 if await self.valve.update_mode(desired):
                     if await self.valve.poll():
-                        self.consecutive_poll_failures = 0
                         poll_valve(self.valve, client)
-                        self._publish_valve_availability(client, True)
-                        self._publish_last_seen(client)
+                        self._record_poll_success(client)
                     else:
-                        self._publish_valve_availability(client, False)
+                        self._record_poll_failure(client)
 
     def on_connect(self, client, userdata, flags, rc):
         logging.info("Connected to MQTT (%s)", rc)
