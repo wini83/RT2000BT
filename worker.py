@@ -20,6 +20,8 @@ class Worker:
         self.ble_lock = asyncio.Lock()
         self.consecutive_poll_failures = 0
         self.mqtt_connected = asyncio.Event()
+        self.pending_setpoint: float | None = None
+        self.setpoint_task: asyncio.Task | None = None
 
     def _publish_bridge_state(self, client: mqtt.Client, payload: str) -> None:
         client.publish(f"{config.mqtt_topic}/state", payload=payload, retain=True)
@@ -177,6 +179,39 @@ class Worker:
         else:
             self._record_poll_failure(client)
 
+    async def _apply_setpoint(self, client: mqtt.Client, value: float) -> None:
+        async with self.ble_lock:
+            if await self._run_command_with_retry(
+                lambda: self.valve.update_temperature(value), "temperature update"
+            ):
+                await self._confirm_command(client)
+
+    async def _drain_setpoints(self, client: mqtt.Client) -> None:
+        try:
+            while self.pending_setpoint is not None:
+                value = self.pending_setpoint
+                self.pending_setpoint = None
+                await self._apply_setpoint(client, value)
+        finally:
+            self.setpoint_task = None
+            # A setpoint can arrive after the loop sees None but before the task
+            # reaches this finally block. Start a new drain in that case.
+            if self.pending_setpoint is not None:
+                self.setpoint_task = asyncio.create_task(self._drain_setpoints(client))
+
+    async def _queue_setpoint(self, client: mqtt.Client, payload: str) -> None:
+        try:
+            value = float(payload.strip())
+        except ValueError:
+            logging.warning("Invalid setpoint payload: %s", payload)
+            return
+
+        # Setpoint sliders can emit many values in a few seconds. Keep only the
+        # newest value waiting behind the BLE operation currently in progress.
+        self.pending_setpoint = value
+        if self.setpoint_task is None or self.setpoint_task.done():
+            self.setpoint_task = asyncio.create_task(self._drain_setpoints(client))
+
     async def _handle_command(self, client: mqtt.Client, topic: str, payload: str) -> None:
         payload = payload.strip().lower()
 
@@ -185,16 +220,7 @@ class Worker:
             return
 
         if topic == f"{config.mqtt_topic}/setpoint/set":
-            try:
-                value = float(payload)
-            except ValueError:
-                logging.warning("Invalid setpoint payload: %s", payload)
-                return
-            async with self.ble_lock:
-                if await self._run_command_with_retry(
-                    lambda: self.valve.update_temperature(value), "temperature update"
-                ):
-                    await self._confirm_command(client)
+            await self._queue_setpoint(client, payload)
             return
 
         if topic == f"{config.mqtt_topic}/mode/set":

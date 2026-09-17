@@ -91,6 +91,7 @@ def test_fourth_failure_does_not_publish_offline_again():
         if call.args
         and call.args[0] == f"{config.mqtt_topic}/availability"
         and call.kwargs.get("payload") == "offline"
+        for call in [call]
     ]
     assert len(offline_calls) == 1
     assert worker._next_poll_interval() == config.poll_interval_seconds
@@ -174,20 +175,54 @@ def test_setpoint_command_retries_then_polls_confirmation():
     worker.valve.update_temperature = AsyncMock(side_effect=[False, True])
     worker.valve.poll = AsyncMock(return_value=True)
 
-    with (
-        patch("worker.asyncio.sleep", new=AsyncMock()),
-        patch("worker.poll_valve") as publish_poll,
-    ):
-        asyncio.run(
-            worker._handle_command(
+    async def run_command():
+        with (
+            patch("worker.asyncio.sleep", new=AsyncMock()),
+            patch("worker.poll_valve") as publish_poll,
+        ):
+            await worker._handle_command(
                 client, f"{config.mqtt_topic}/setpoint/set", "22.5"
             )
-        )
+            await worker.setpoint_task
+            return publish_poll
+
+    publish_poll = asyncio.run(run_command())
 
     assert worker.valve.update_temperature.await_count == 2
     worker.valve.update_temperature.assert_awaited_with(22.5)
     worker.valve.poll.assert_awaited_once()
     publish_poll.assert_called_once_with(worker.valve, client)
+
+
+def test_rapid_setpoints_keep_only_latest_waiting_value():
+    worker = make_worker()
+    client = MagicMock()
+    first_started = asyncio.Event()
+    release_first = asyncio.Event()
+    applied = []
+
+    async def update_temperature(value):
+        applied.append(value)
+        if len(applied) == 1:
+            first_started.set()
+            await release_first.wait()
+        return True
+
+    worker.valve.update_temperature = AsyncMock(side_effect=update_temperature)
+    worker.valve.poll = AsyncMock(return_value=True)
+
+    async def run_commands():
+        with patch("worker.poll_valve"):
+            await worker._queue_setpoint(client, "25.5")
+            await first_started.wait()
+            for value in ("25.0", "24.5", "23.0", "21.0", "20.5"):
+                await worker._queue_setpoint(client, value)
+            release_first.set()
+            await worker.setpoint_task
+
+    asyncio.run(run_commands())
+
+    assert applied == [25.5, 20.5]
 
 
 def test_mode_command_retries_then_polls_confirmation():
